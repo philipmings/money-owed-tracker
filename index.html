@@ -32,7 +32,7 @@ header{padding:24px 2px 14px;display:flex;align-items:center;justify-content:spa
 .muted{color:#6b7280;font-size:13px}
 .search{width:100%;border:1px solid #e5e7eb;background:white;border-radius:14px;padding:13px 14px;font-size:16px;margin-bottom:10px}
 .person,.txn{background:white;border-radius:16px;padding:14px 15px;margin-bottom:9px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 3px 14px #1118270a}
-.personname,.txntitle{font-weight:800}
+.person{cursor:pointer}.person:active{transform:scale(.995)}.personname,.txntitle{font-weight:800}
 .balances,.txndetail{font-size:12px;color:#6b7280;margin-top:4px;line-height:1.45}
 .amount{text-align:right;font-weight:800}
 .positive{color:#047857}.negative{color:#b42318}.zero{color:#6b7280}
@@ -66,6 +66,22 @@ header{padding:24px 2px 14px;display:flex;align-items:center;justify-content:spa
 .smallbtn{border:0;background:transparent;color:#374151;font-weight:750}
 .status{font-size:12px;color:#b42318;margin-top:10px;min-height:18px}
 @media(max-width:460px){.money{font-size:20px}.card{padding:13px}.row{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}}
+
+.statementSheet{background:white;width:min(760px,100%);border-radius:24px 24px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));max-height:94vh;overflow:auto}
+.statementTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.statementTop h2{margin:0;font-size:23px}.closex{border:0;background:#f3f4f6;border-radius:12px;width:40px;height:40px;font-size:21px}
+.statementBalances{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 16px}
+.statementBalance{border-radius:15px;padding:13px;background:#f9fafb}
+.statementBalance .btitle{font-size:11px;font-weight:850;color:#6b7280;text-transform:uppercase;letter-spacing:.06em}
+.statementBalance .bvalue{font-size:16px;font-weight:850;margin-top:6px}
+.exportGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.exportbtn{border:0;border-radius:14px;padding:13px 10px;font-size:14px;font-weight:850}
+.exportbtn.pdf{background:#111827;color:white}.exportbtn.xlsx{background:#e8f5ee;color:#065f46}
+.statementTx{border-top:1px solid #e5e7eb;padding:12px 0}
+.statementTx:first-child{border-top:0}.statementTxHead{display:flex;justify-content:space-between;gap:12px;font-weight:800;font-size:13px}
+.statementTxSub{font-size:12px;color:#6b7280;margin-top:4px;line-height:1.4}
+.statementHint{font-size:12px;color:#6b7280;margin:-8px 0 14px}
+
 </style>
 </head>
 <body>
@@ -101,7 +117,7 @@ header{padding:24px 2px 14px;display:flex;align-items:center;justify-content:spa
 
 <section class="section">
   <div class="sectionhead"><h2>People</h2><span class="muted" id="peopleCount">0 people</span></div>
-  <input class="search" id="search" placeholder="Search a person">
+  <input class="search" id="search" placeholder="Filter by person">
   <div id="peopleList"></div>
 </section>
 
@@ -150,13 +166,38 @@ header{padding:24px 2px 14px;display:flex;align-items:center;justify-content:spa
 </div>
 </div>
 
+
+<div class="overlay" id="statementOverlay">
+  <div class="statementSheet">
+    <div class="handle"></div>
+    <div class="statementTop">
+      <div>
+        <div class="eyebrow">Person statement</div>
+        <h2 id="statementName">Statement</h2>
+      </div>
+      <button class="closex" id="statementClose" type="button">×</button>
+    </div>
+    <div class="statementBalances">
+      <div class="statementBalance"><div class="btitle">TTD</div><div class="bvalue" id="statementTTD">Settled</div></div>
+      <div class="statementBalance"><div class="btitle">USD</div><div class="bvalue" id="statementUSD">Settled</div></div>
+    </div>
+    <div class="exportGrid">
+      <button class="exportbtn pdf" id="exportPdf" type="button">Share / Export PDF</button>
+      <button class="exportbtn xlsx" id="exportExcel" type="button">Share / Export Excel</button>
+    </div>
+    <div class="statementHint">On Samsung, the Android Share sheet can send the exported file directly to WhatsApp.</div>
+    <div class="sectionhead"><h2>Transaction history</h2><span class="muted" id="statementCount"></span></div>
+    <div id="statementTransactions"></div>
+  </div>
+</div>
+
 <script>
 var API='https://yjdjljrwmdbmrlinkvxc.supabase.co/functions/v1/money-owed-api',
 accessKey=localStorage.getItem('moneyOwedAccessKey')||'',
 currency='TTD',
 actionMode='they_owe',
 direction=1,
-dashboard={balances:[],summary:[],recent:[]};
+dashboard={balances:[],summary:[],recent:[]},selectedPerson=null;
 
 function el(id){return document.getElementById(id)}
 function fmt(n){return new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n||0))}
@@ -259,9 +300,13 @@ function render(){
   }else{
     el('peopleList').innerHTML=shown.map(function(p){
       var overall=p.TTD+p.USD, cls=overall>0?'positive':overall<0?'negative':'zero';
-      return'<div class="person"><div><div class="personname">'+esc(p.name)+'</div><div class="balances">'+esc(personBalanceText(p))+'</div></div><div class="amount '+cls+'">'+(p.TTD===0&&p.USD===0?'Settled':'')+'</div></div>'
+      return'<div class="person" data-person-id="'+esc(p.id)+'"><div><div class="personname">'+esc(p.name)+'</div><div class="balances">'+esc(personBalanceText(p))+'</div></div><div class="amount '+cls+'">'+(p.TTD===0&&p.USD===0?'Settled':'View ›')+'</div></div>'
     }).join('')
   }
+
+  document.querySelectorAll('[data-person-id]').forEach(function(card){
+    card.onclick=function(){openStatement(card.dataset.personId)}
+  });
 
   var recent=dashboard.recent||[];
   if(!recent.length){
@@ -275,6 +320,82 @@ function render(){
     }).join('')
   }
 }
+
+
+async function openStatement(personId){
+  try{
+    el('statementOverlay').style.display='flex';
+    el('statementName').textContent='Loading…';
+    el('statementTransactions').innerHTML='<div class="empty">Loading statement…</div>';
+    var d=await api('?action=transactions&person_id='+encodeURIComponent(personId));
+    selectedPerson={id:personId,name:d.person.name,balances:d.balances,transactions:d.transactions||[]};
+    el('statementName').textContent=selectedPerson.name;
+    el('statementTTD').textContent=balancePhrase(selectedPerson.name,Number(selectedPerson.balances.TTD||0),'TTD');
+    el('statementUSD').textContent=balancePhrase(selectedPerson.name,Number(selectedPerson.balances.USD||0),'USD');
+    el('statementCount').textContent=selectedPerson.transactions.length+' '+(selectedPerson.transactions.length===1?'entry':'entries');
+    if(!selectedPerson.transactions.length){
+      el('statementTransactions').innerHTML='<div class="empty">No transactions recorded.</div>';
+    }else{
+      el('statementTransactions').innerHTML=selectedPerson.transactions.map(function(t){
+        var signed=Number(t.signed_amount||0);
+        return '<div class="statementTx"><div class="statementTxHead"><span>'+esc(t.transaction_date)+' · '+esc(labelType(t.transaction_type))+'</span><span class="'+(signed>=0?'positive':'negative')+'">'+(signed>=0?'+':'−')+money(Math.abs(signed),t.currency)+'</span></div><div class="statementTxSub">'+esc(t.currency)+(t.description?' · '+esc(t.description):'')+'</div></div>';
+      }).join('');
+    }
+  }catch(err){
+    showToast('Could not open statement: '+err.message);
+    el('statementOverlay').style.display='none';
+  }
+}
+
+function closeStatement(){
+  el('statementOverlay').style.display='none';
+}
+
+function cleanFileName(v){
+  return String(v||'statement').replace(/[^a-zA-Z0-9 _-]/g,'').trim().replace(/\s+/g,'_').slice(0,60)||'statement';
+}
+
+async function exportStatement(format){
+  if(!selectedPerson)return;
+  var btn=format==='pdf'?el('exportPdf'):el('exportExcel'),
+      original=btn.textContent;
+  btn.disabled=true;
+  btn.textContent='Preparing…';
+  try{
+    var url=API+'?action=export&person_id='+encodeURIComponent(selectedPerson.id)+'&format='+encodeURIComponent(format);
+    var r=await fetch(url,{headers:{Authorization:'Bearer '+accessKey}});
+    if(!r.ok){
+      var err={};try{err=await r.json()}catch(e){}
+      throw new Error(err.error||'Export failed');
+    }
+    var blob=await r.blob(),
+        ext=format==='pdf'?'pdf':'xlsx',
+        mime=format==='pdf'?'application/pdf':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        file=new File([blob],'Money_Owed_'+cleanFileName(selectedPerson.name)+'.'+ext,{type:mime}),
+        shareData={title:'Money Owed - '+selectedPerson.name,text:'Money owed statement for '+selectedPerson.name,files:[file]};
+
+    if(navigator.share && (!navigator.canShare || navigator.canShare(shareData))){
+      await navigator.share(shareData);
+      showToast('Statement ready to share.');
+    }else{
+      var href=URL.createObjectURL(blob),
+          a=document.createElement('a');
+      a.href=href;
+      a.download=file.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function(){URL.revokeObjectURL(href)},1500);
+      showToast(file.name+' downloaded. Attach it in WhatsApp.');
+    }
+  }catch(err){
+    if(err.name!=='AbortError')showToast('Export failed: '+err.message);
+  }finally{
+    btn.disabled=false;
+    btn.textContent=original;
+  }
+}
+
 
 function setCur(c){
   currency=c;
@@ -327,6 +448,10 @@ el('refreshBtn').onclick=load;
 el('search').oninput=render;
 el('addBtn').onclick=openSheet;
 el('cancelBtn').onclick=closeSheet;
+el('statementClose').onclick=closeStatement;
+el('statementOverlay').onclick=function(e){if(e.target===el('statementOverlay'))closeStatement()};
+el('exportPdf').onclick=function(){exportStatement('pdf')};
+el('exportExcel').onclick=function(){exportStatement('xlsx')};
 el('forgetBtn').onclick=function(){
   localStorage.removeItem('moneyOwedAccessKey');
   accessKey='';
