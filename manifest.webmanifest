@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#f5f7fb",
   "theme_color": "#111827",
-  "description": "Private personal ledger with person statements and PDF/Excel exports for TTD and USD.",
+  "description": "Private personal ledger with robust PDF and Excel exports for TTD and USD.",
   "icons": [
     {
       "src": "icon-192.png",

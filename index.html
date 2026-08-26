@@ -374,10 +374,23 @@ async function exportStatement(format){
         file=new File([blob],'Money_Owed_'+cleanFileName(selectedPerson.name)+'.'+ext,{type:mime}),
         shareData={title:'Money Owed - '+selectedPerson.name,text:'Money owed statement for '+selectedPerson.name,files:[file]};
 
+    var shared=false;
     if(navigator.share && (!navigator.canShare || navigator.canShare(shareData))){
-      await navigator.share(shareData);
-      showToast('Statement ready to share.');
-    }else{
+      try{
+        await navigator.share(shareData);
+        shared=true;
+        showToast('Statement ready to share.');
+      }catch(shareErr){
+        if(shareErr && shareErr.name==='AbortError'){
+          return;
+        }
+        // Some Android/Samsung WebView/PWA builds reject XLSX file sharing
+        // even when the browser reports that file sharing is supported.
+        // Fall back to a normal download instead of reporting export failure.
+      }
+    }
+
+    if(!shared){
       var href=URL.createObjectURL(blob),
           a=document.createElement('a');
       a.href=href;
@@ -385,8 +398,12 @@ async function exportStatement(format){
       document.body.appendChild(a);
       a.click();
       a.remove();
-      setTimeout(function(){URL.revokeObjectURL(href)},1500);
-      showToast(file.name+' downloaded. Attach it in WhatsApp.');
+      setTimeout(function(){URL.revokeObjectURL(href)},3000);
+      if(format==='xlsx'){
+        showToast('Excel downloaded. Open Downloads, tap the file, then Share → WhatsApp.');
+      }else{
+        showToast(file.name+' downloaded. Attach it in WhatsApp.');
+      }
     }
   }catch(err){
     if(err.name!=='AbortError')showToast('Export failed: '+err.message);
