@@ -6,7 +6,7 @@
   "display": "standalone",
   "background_color": "#f5f7fb",
   "theme_color": "#111827",
-  "description": "Private personal ledger for tracking money owed in TTD and USD.",
+  "description": "Private personal ledger for tracking money owed to me and money I owe in TTD and USD.",
   "icons": [
     {
       "src": "icon-192.png",
