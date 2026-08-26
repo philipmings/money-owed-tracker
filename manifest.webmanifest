@@ -1,12 +1,12 @@
 {
   "name": "Money Owed Tracker",
   "short_name": "Money Owed",
-  "start_url": "./",
+  "start_url": "./?v=8",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f5f7fb",
   "theme_color": "#111827",
-  "description": "Private personal ledger with a premium updated app icon, clean transaction rows, and professional exports.",
+  "description": "Money Owed Tracker v8 with cache-busting updates and professional ledger exports.",
   "icons": [
     {
       "src": "icon-192.png",
@@ -20,5 +20,6 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "id": "./"
 }
