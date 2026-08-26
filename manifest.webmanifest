@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "Money Owed Tracker",
+  "short_name": "Money Owed",
+  "start_url": "./?release=v11",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#111827",
+  "description": "Money Owed Tracker final clean release with Loan, Purchases, Repayment and Adjustment categories.",
+  "icons": [
+    {
+      "src": "money-owed-icon-192-v11.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "money-owed-icon-512-v11.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
