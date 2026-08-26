@@ -89,10 +89,16 @@ header{padding:24px 2px 14px;display:flex;align-items:center;justify-content:spa
 .statementTxSub{font-size:12px;color:#6b7280;margin-top:4px;line-height:1.4}
 .statementHint{font-size:12px;color:#6b7280;margin:-8px 0 14px}
 
+
+.personName{font-weight:700}
+.itemText{font-weight:400}
+.txntitle{font-weight:400}
+.statementTxHead span:first-child{font-weight:400}
+
 </style>
-<meta name="app-build" content="fresh-v9-2026-08-26">
+<meta name="app-build" content="final-v10-2026-08-26">
 </head>
-<body data-build="v9">
+<body data-build="v10">
 <div class="lock" id="lock">
   <div class="lockbox">
     <div class="eyebrow">Private ledger</div>
@@ -324,7 +330,7 @@ function render(){
       var name=t.people&&t.people.name?t.people.name:'Unknown',
           signed=Number(t.signed_amount||0),
           item=(t.description&&String(t.description).trim())?String(t.description).trim():labelType(t.transaction_type);
-      return'<div class="txn"><div><div class="txntitle">'+esc(name)+' · '+esc(item)+'</div><div class="txndetail">'+t.transaction_date+' · '+esc(t.currency)+'</div></div><div class="amount '+(signed>=0?'positive':'negative')+'">'+(signed>=0?'+':'−')+money(Math.abs(signed),t.currency)+'</div></div>'
+      return'<div class="txn"><div><div class="txntitle"><span class="personName">'+esc(name)+'</span><span class="itemText"> · '+esc(item)+'</span></div><div class="txndetail">'+t.transaction_date+' · '+esc(t.currency)+'</div></div><div class="amount '+(signed>=0?'positive':'negative')+'">'+(signed>=0?'+':'−')+money(Math.abs(signed),t.currency)+'</div></div>'
     }).join('')
   }
 }

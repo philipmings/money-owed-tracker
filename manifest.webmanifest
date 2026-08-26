@@ -2,12 +2,12 @@
   "id": "./",
   "name": "Money Owed Tracker",
   "short_name": "Money Owed",
-  "start_url": "./?release=v9",
+  "start_url": "./?release=v10",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f5f7fb",
   "theme_color": "#111827",
-  "description": "Private personal ledger for money owed to me and money I owe, with professional PDF and Excel statements.",
+  "description": "Money Owed Tracker final release with lighter transaction typography and professional exports.",
   "icons": [
     {
       "src": "money-owed-icon-192-v9.png",

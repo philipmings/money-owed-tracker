@@ -1,4 +1,4 @@
-const CACHE='money-owed-fresh-v9';
+const CACHE='money-owed-final-v10';
 const STATIC=[
   './manifest.webmanifest?v=9',
   './money-owed-icon-192-v9.png',
