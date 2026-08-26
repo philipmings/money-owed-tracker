@@ -1,9 +1,10 @@
-const CACHE='money-owed-shell-v8';
+const CACHE='money-owed-fresh-v9';
 const STATIC=[
-  './manifest.webmanifest',
-  './icon-192.png',
-  './icon-512.png',
-  './apple-touch-icon.png'
+  './manifest.webmanifest?v=9',
+  './money-owed-icon-192-v9.png',
+  './money-owed-icon-512-v9.png',
+  './money-owed-apple-touch-v9.png',
+  './money-owed-favicon-32-v9.png'
 ];
 
 self.addEventListener('install', event => {
@@ -24,13 +25,11 @@ self.addEventListener('fetch', event => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // Never cache the live Supabase API.
   if (url.hostname.endsWith('supabase.co')) return;
 
-  // Always fetch HTML/navigation fresh. Use cached index only if offline.
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req, { cache: 'no-store' })
+      fetch(req, {cache:'no-store'})
         .then(resp => {
           const copy = resp.clone();
           caches.open(CACHE).then(cache => cache.put('./index.html', copy));
@@ -43,7 +42,7 @@ self.addEventListener('fetch', event => {
 
   if (req.method === 'GET') {
     event.respondWith(
-      fetch(req, { cache: 'no-store' })
+      fetch(req, {cache:'no-store'})
         .then(resp => {
           if (resp.ok) {
             const copy = resp.clone();
