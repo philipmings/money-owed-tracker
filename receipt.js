@@ -16,7 +16,7 @@
     var d=clean(transactionDate).replace(/[^0-9]/g,'').slice(0,8)||'00000000';
     return 'MOT-'+d+'-'+compactId(transactionId)
   }
-  function statusFor(balance){return Math.abs(num(balance))<0.005?'PAID':'PART PAYMENT'}
+  function statusFor(balance){return num(balance)<0.005?'PAID':'PART PAYMENT'}
   function baseReceipt(data){
     var out={
       transactionId:clean(data.transactionId),
