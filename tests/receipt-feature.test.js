@@ -40,15 +40,28 @@ const app = fs.readFileSync('receipt-app.js', 'utf8');
 assert.ok(app.includes('receiptOverlay'));
 assert.ok(app.includes('Share Receipt'));
 assert.ok(app.includes('Save PDF'));
-assert.ok(app.includes("actionMode==='they_paid'"));
+assert.ok(app.includes("window.actionMode==='they_paid'"));
 assert.ok(app.includes('ReceiptTools.buildReceiptFromConfirmed'));
 assert.ok(app.includes('ReceiptTools.buildHistoricalReceipt'));
 assert.ok(app.includes('navigator.share'));
 assert.ok(app.includes('ReceiptTools.printReceipt'));
+assert.ok(app.includes("navigator.serviceWorker.register('/sw.js')"));
+
+const shell = fs.readFileSync('receipt-shell.html', 'utf8');
+assert.ok(shell.includes('/receipt.js?v=17'));
+assert.ok(shell.includes('/receipt-app.js?v=17'));
+assert.ok(shell.includes("fetch('/index.html?core=v17'"));
 
 const sw = fs.readFileSync('sw.js', 'utf8');
 assert.ok(sw.includes("'./receipt.js?v=17'"));
 assert.ok(sw.includes("'./receipt-app.js?v=17'"));
-assert.ok(sw.includes('receipt-app.js?v=17'));
+assert.ok(sw.includes("'./receipt-shell.html?release=v17'"));
+
+const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
+assert.equal(manifest.start_url,'/receipt-shell.html?release=v17');
+
+const vercel = JSON.parse(fs.readFileSync('vercel.json','utf8'));
+assert.equal(vercel.rewrites[0].source,'/');
+assert.equal(vercel.rewrites[0].destination,'/receipt-shell.html');
 
 console.log('payment receipt feature checks passed');
