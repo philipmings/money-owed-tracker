@@ -20,6 +20,12 @@ const paid = ReceiptTools.buildReceiptFromConfirmed(
 );
 assert.equal(paid.status, 'PAID');
 
+const overpaid = ReceiptTools.buildReceiptFromConfirmed(
+  { transaction_id: 'paid-002', person_name: 'Avery', currency: 'TTD', previous_balance: 300, new_balance: -100 },
+  { amount: 400, description: '', transaction_date: '2026-09-08' }
+);
+assert.equal(overpaid.status, 'PAID');
+
 const history = [
   { id: 'loan', transaction_date: '2026-09-01', created_at: '2026-09-01T10:00:00Z', currency: 'TTD', transaction_type: 'cash_loan', signed_amount: 1000, amount: 1000, direction: 1 },
   { id: 'payment', transaction_date: '2026-09-02', created_at: '2026-09-02T10:00:00Z', currency: 'TTD', transaction_type: 'repayment', signed_amount: -400, amount: 400, direction: -1, description: 'Part payment' }
