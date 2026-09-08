@@ -17,7 +17,7 @@
     var html=await response.text();
     html=html.replace(/manifest\.webmanifest\?v=\d+/,'manifest.webmanifest?v=17');
     if(!html.includes('receipt-app.js?v=17')){
-      html=html.replace('</body>','<script src="/receipt.js?v=17"><\\/script><script src="/receipt-app.js?v=17"><\\/script></body>');
+      html=html.replace('</body>','<script src="/receipt.js?v=17"><\/script><script src="/receipt-app.js?v=17"><\/script></body>');
     }
     document.open();document.write(html);document.close();
   }catch(e){
