@@ -1,23 +1,13 @@
 const fs = require('fs');
 const assert = require('assert');
-const vm = require('vm');
 
+const index = fs.readFileSync('index.html', 'utf8');
 const sw = fs.readFileSync('sw.js', 'utf8');
-const match = sw.match(/function normalizeAppSource\(html\)\{([\s\S]*?)\n\}/);
-assert.ok(match, 'normalizeAppSource must exist');
 
-const context = {};
-vm.runInNewContext(`function normalizeAppSource(html){${match[1]}\n}; this.normalizeAppSource=normalizeAppSource;`, context);
+assert.ok(index.includes("['borrowed_from_them','Loan']"));
+assert.ok(index.includes("['they_bought_for_me','Purchases']"));
+assert.ok(index.includes("['they_paid_me','Repayment']"));
+assert.ok(index.includes("['paid_them','Repayment']"));
+assert.ok(!sw.includes('normalizeAppSource'), 'service worker must not rewrite transaction aliases');
 
-const broken = "opts=[['borrowed_from_them','Loan'],['they_bought_for_me','Purchases']]; paid=[['they_paid_me','Repayment'],['paid_them','Repayment']]";
-const fixed = context.normalizeAppSource(broken);
-
-assert.ok(fixed.includes("['cash_loan','Loan']"));
-assert.ok(fixed.includes("['purchase_on_behalf','Purchases']"));
-assert.ok(fixed.includes("['repayment','Repayment']"));
-assert.ok(!fixed.includes('borrowed_from_them'));
-assert.ok(!fixed.includes('they_bought_for_me'));
-assert.ok(!fixed.includes('they_paid_me'));
-assert.ok(!fixed.includes('paid_them'));
-
-console.log('transaction mapping regression checks passed');
+console.log('transaction alias regression checks passed');
