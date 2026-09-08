@@ -1,3 +1,4 @@
+const fs = require('fs');
 const assert = require('assert');
 const ReceiptTools = require('../receipt.js');
 
@@ -35,4 +36,19 @@ assert.ok(text.includes('TTD 400.00'));
 assert.ok(text.includes(confirmed.receiptNumber));
 assert.ok(text.includes('TTD 500.00'));
 
-console.log('payment receipt helper checks passed');
+const app = fs.readFileSync('receipt-app.js', 'utf8');
+assert.ok(app.includes('receiptOverlay'));
+assert.ok(app.includes('Share Receipt'));
+assert.ok(app.includes('Save PDF'));
+assert.ok(app.includes("actionMode==='they_paid'"));
+assert.ok(app.includes('ReceiptTools.buildReceiptFromConfirmed'));
+assert.ok(app.includes('ReceiptTools.buildHistoricalReceipt'));
+assert.ok(app.includes('navigator.share'));
+assert.ok(app.includes('ReceiptTools.printReceipt'));
+
+const sw = fs.readFileSync('sw.js', 'utf8');
+assert.ok(sw.includes("'./receipt.js?v=17'"));
+assert.ok(sw.includes("'./receipt-app.js?v=17'"));
+assert.ok(sw.includes('receipt-app.js?v=17'));
+
+console.log('payment receipt feature checks passed');
