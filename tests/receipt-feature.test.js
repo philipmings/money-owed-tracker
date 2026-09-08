@@ -1,5 +1,6 @@
 const fs = require('fs');
 const assert = require('assert');
+const vm = require('vm');
 const ReceiptTools = require('../receipt.js');
 
 const confirmed = ReceiptTools.buildReceiptFromConfirmed(
@@ -51,6 +52,10 @@ const shell = fs.readFileSync('receipt-shell.html', 'utf8');
 assert.ok(shell.includes('/receipt.js?v=17'));
 assert.ok(shell.includes('/receipt-app.js?v=17'));
 assert.ok(shell.includes("fetch('/index.html?core=v17'"));
+const injectionMatch = shell.match(/html=html\.replace\('<\/body>',('(?:[^'\\]|\\.)*')\);/);
+assert.ok(injectionMatch, 'shell injection string must be present');
+const injectedMarkup = vm.runInNewContext(injectionMatch[1]);
+assert.ok(injectedMarkup.includes('</script><script src="/receipt-app.js?v=17"></script></body>'));
 
 const sw = fs.readFileSync('sw.js', 'utf8');
 assert.ok(sw.includes("'./receipt.js?v=17'"));
