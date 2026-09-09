@@ -1,6 +1,9 @@
-const CACHE='money-owed-pwa-v16';
+const CACHE='money-owed-pwa-v17';
 const STATIC=[
-  './manifest.webmanifest?v=16',
+  './manifest.webmanifest?v=17',
+  './receipt-shell.html?release=v17',
+  './receipt.js?v=17',
+  './receipt-app.js?v=17',
   './money-owed-icon-192-v11.png',
   './money-owed-icon-512-v11.png',
   './money-owed-apple-touch-v11.png',
@@ -13,9 +16,7 @@ self.addEventListener('install',event=>{
 });
 
 self.addEventListener('activate',event=>{
-  event.waitUntil(
-    caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key))))
-  );
+  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));
   self.clients.claim();
 });
 
@@ -27,12 +28,9 @@ self.addEventListener('fetch',event=>{
   if(request.mode==='navigate'){
     event.respondWith(
       fetch(request,{cache:'no-store'}).then(response=>{
-        if(response.ok){
-          const copy=response.clone();
-          caches.open(CACHE).then(cache=>cache.put('./index.html',copy));
-        }
+        if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(request,copy))}
         return response;
-      }).catch(()=>caches.match('./index.html'))
+      }).catch(()=>caches.match(request).then(cached=>cached||caches.match('./receipt-shell.html?release=v17')))
     );
     return;
   }
@@ -40,10 +38,7 @@ self.addEventListener('fetch',event=>{
   if(request.method==='GET'){
     event.respondWith(
       fetch(request,{cache:'no-store'}).then(response=>{
-        if(response.ok){
-          const copy=response.clone();
-          caches.open(CACHE).then(cache=>cache.put(request,copy));
-        }
+        if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(request,copy))}
         return response;
       }).catch(()=>caches.match(request))
     );

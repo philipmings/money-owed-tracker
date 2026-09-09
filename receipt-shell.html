@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Money Owed Tracker</title>
+<style>body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:#f5f7fb;color:#111827}.boot{min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center}.boot strong{font-size:20px}.boot span{display:block;margin-top:8px;color:#6b7280;font-size:13px}</style>
+</head>
+<body>
+<div class="boot"><div><strong>Money Owed</strong><span>Opening your ledger…</span></div></div>
+<script>
+(async function(){
+  try{
+    var response=await fetch('/index.html?core=v17',{cache:'no-store'});
+    if(!response.ok)throw new Error('Could not load the tracker');
+    var html=await response.text();
+    html=html.replace(/manifest\.webmanifest\?v=\d+/,'manifest.webmanifest?v=17');
+    if(!html.includes('receipt-app.js?v=17')){
+      html=html.replace('</body>','<script src="/receipt.js?v=17"><\/script><script src="/receipt-app.js?v=17"><\/script></body>');
+    }
+    document.open();document.write(html);document.close();
+  }catch(e){
+    document.body.innerHTML='<div class="boot"><div><strong>Could not open Money Owed</strong><span>Check your connection and refresh the page.</span></div></div>';
+  }
+})();
+</script>
+</body>
+</html>
