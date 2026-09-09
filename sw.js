@@ -1,9 +1,9 @@
-const CACHE='money-owed-pwa-v18';
+const CACHE='money-owed-pwa-v19';
 const STATIC=[
-  './manifest.webmanifest?v=18',
-  './receipt-shell.html?release=v18',
-  './receipt.js?v=18',
-  './receipt-app.js?v=18',
+  './manifest.webmanifest?v=19',
+  './receipt-shell.html?release=v19',
+  './receipt.js?v=19',
+  './receipt-app.js?v=19',
   './money-owed-icon-192-v11.png',
   './money-owed-icon-512-v11.png',
   './money-owed-apple-touch-v11.png',
@@ -30,7 +30,7 @@ self.addEventListener('fetch',event=>{
       fetch(request,{cache:'no-store'}).then(response=>{
         if(response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(request,copy))}
         return response;
-      }).catch(()=>caches.match(request).then(cached=>cached||caches.match('./receipt-shell.html?release=v18')))
+      }).catch(()=>caches.match(request).then(cached=>cached||caches.match('./receipt-shell.html?release=v19')))
     );
     return;
   }
