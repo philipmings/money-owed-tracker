@@ -22,9 +22,9 @@
 .receiptStatus.partial{background:#fff7ed;color:#9a3412}
 .receiptPerson{font-size:21px;font-weight:850;margin-top:18px;color:#111827}.receiptMeta{font-size:13px;color:#6b7280;margin-top:5px;line-height:1.5}
 .receiptRows{margin-top:20px;border-top:1px solid #e5e7eb}.receiptRow{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid #f0f1f3;font-size:13px}.receiptRow span{color:#6b7280}.receiptRow strong{color:#111827;text-align:right}
-.receiptFooter{margin-top:24px;font-size:11px;color:#9ca3af;line-height:1.5}.receiptActions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.receiptAction{border:0;border-radius:14px;padding:14px 12px;font-size:14px;font-weight:850}.receiptAction.share{background:#111827;color:#fff}.receiptAction.pdf{background:#e8f5ee;color:#065f46}.receiptDone{width:100%;border:0;background:transparent;padding:13px;color:#6b7280;font-weight:750}
+.receiptFooter{margin-top:24px;font-size:11px;color:#9ca3af;line-height:1.5}.receiptActions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}.receiptAction{border:0;border-radius:14px;padding:14px 12px;font-size:14px;font-weight:850}.receiptAction.share{background:#111827;color:#fff}.receiptAction.download{background:#eef2ff;color:#3730a3}.receiptAction.pdf{background:#e8f5ee;color:#065f46}.receiptDone{width:100%;border:0;background:transparent;padding:13px;color:#6b7280;font-weight:750}
 .receiptHistoryBtn{margin-top:9px;border:0;border-radius:10px;padding:7px 10px;background:#eef2f7;color:#25324a;font-size:11px;font-weight:800}
-@media(max-width:460px){.receiptPreview{padding:22px 18px}.receiptAmount{font-size:32px}.receiptActions{grid-template-columns:1fr 1fr}}
+@media(max-width:460px){.receiptPreview{padding:22px 18px}.receiptAmount{font-size:32px}.receiptActions{grid-template-columns:1fr}}
 `;
     document.head.appendChild(style)
   }
@@ -44,13 +44,14 @@
     </div>
     <div class="receiptFooter">Generated from a confirmed Money Owed Tracker ledger transaction.</div>
   </div>
-  <div class="receiptActions"><button class="receiptAction share" id="shareReceiptBtn" type="button">Share Receipt</button><button class="receiptAction pdf" id="saveReceiptPdfBtn" type="button">Save PDF</button></div>
+  <div class="receiptActions"><button class="receiptAction share" id="shareReceiptBtn" type="button">Share Receipt</button><button class="receiptAction download" id="downloadReceiptBtn" type="button">Download Receipt</button><button class="receiptAction pdf" id="saveReceiptPdfBtn" type="button">Save PDF</button></div>
   <button class="receiptDone" id="receiptDoneBtn" type="button">Done</button>
 </div>`;
     document.body.appendChild(wrap);
     byId('receiptDoneBtn').onclick=closeReceipt;
     byId('receiptOverlay').onclick=function(e){if(e.target===byId('receiptOverlay'))closeReceipt()};
     byId('shareReceiptBtn').onclick=shareReceipt;
+    byId('downloadReceiptBtn').onclick=downloadReceipt;
     byId('saveReceiptPdfBtn').onclick=saveReceiptPdf
   }
 
@@ -85,6 +86,17 @@
       }
       downloadBlob(blob,file.name);toast('Receipt image downloaded.')
     }catch(e){toast(e&&e.message?e.message:'Could not share receipt')}
+    finally{button.disabled=false;button.textContent=old}
+  }
+
+  async function downloadReceipt(){
+    if(!currentReceipt)return;
+    var button=byId('downloadReceiptBtn'),old=button.textContent;button.disabled=true;button.textContent='Preparing…';
+    try{
+      var blob=await ReceiptTools.renderReceiptPng(currentReceipt);
+      downloadBlob(blob,safeFileName(currentReceipt.receiptNumber)+'.png');
+      toast('Receipt downloaded.')
+    }catch(e){toast(e&&e.message?e.message:'Could not download receipt')}
     finally{button.disabled=false;button.textContent=old}
   }
 
