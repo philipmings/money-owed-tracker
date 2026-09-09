@@ -12,12 +12,12 @@
 <script>
 (async function(){
   try{
-    var response=await fetch('/index.html?core=v17',{cache:'no-store'});
+    var response=await fetch('/index.html?core=v18',{cache:'no-store'});
     if(!response.ok)throw new Error('Could not load the tracker');
     var html=await response.text();
-    html=html.replace(/manifest\.webmanifest\?v=\d+/,'manifest.webmanifest?v=17');
-    if(!html.includes('receipt-app.js?v=17')){
-      html=html.replace('</body>','<script src="/receipt.js?v=17"><\/script><script src="/receipt-app.js?v=17"><\/script></body>');
+    html=html.replace(/manifest\.webmanifest\?v=\d+/,'manifest.webmanifest?v=18');
+    if(!html.includes('receipt-app.js?v=18')){
+      html=html.replace('</body>','<script src="/receipt.js?v=18"><\/script><script src="/receipt-app.js?v=18"><\/script></body>');
     }
     document.open();document.write(html);document.close();
   }catch(e){

@@ -55,21 +55,21 @@ assert.ok(app.includes('ReceiptTools.printReceipt'));
 assert.ok(app.includes("navigator.serviceWorker.register('/sw.js')"));
 
 const shell = fs.readFileSync('receipt-shell.html', 'utf8');
-assert.ok(shell.includes('/receipt.js?v=17'));
-assert.ok(shell.includes('/receipt-app.js?v=17'));
-assert.ok(shell.includes("fetch('/index.html?core=v17'"));
+assert.ok(shell.includes('/receipt.js?v=18'));
+assert.ok(shell.includes('/receipt-app.js?v=18'));
+assert.ok(shell.includes("fetch('/index.html?core=v18'"));
 const injectionMatch = shell.match(/html=html\.replace\('<\/body>',('(?:[^'\\]|\\.)*')\);/);
 assert.ok(injectionMatch, 'shell injection string must be present');
 const injectedMarkup = vm.runInNewContext(injectionMatch[1]);
-assert.ok(injectedMarkup.includes('</script><script src="/receipt-app.js?v=17"></script></body>'));
+assert.ok(injectedMarkup.includes('</script><script src="/receipt-app.js?v=18"></script></body>'));
 
 const sw = fs.readFileSync('sw.js', 'utf8');
-assert.ok(sw.includes("'./receipt.js?v=17'"));
-assert.ok(sw.includes("'./receipt-app.js?v=17'"));
-assert.ok(sw.includes("'./receipt-shell.html?release=v17'"));
+assert.ok(sw.includes("'./receipt.js?v=18'"));
+assert.ok(sw.includes("'./receipt-app.js?v=18'"));
+assert.ok(sw.includes("'./receipt-shell.html?release=v18'"));
 
 const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
-assert.equal(manifest.start_url,'/receipt-shell.html?release=v17');
+assert.equal(manifest.start_url,'/receipt-shell.html?release=v18');
 
 const vercel = JSON.parse(fs.readFileSync('vercel.json','utf8'));
 assert.equal(vercel.rewrites[0].source,'/');
