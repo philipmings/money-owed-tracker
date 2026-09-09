@@ -3,7 +3,7 @@
   "name": "Money Owed Tracker",
   "short_name": "Money Owed",
   "description": "Personal money owed ledger for tracking TTD and USD balances.",
-  "start_url": "/receipt-shell.html?release=v17",
+  "start_url": "/receipt-shell.html?release=v18",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
