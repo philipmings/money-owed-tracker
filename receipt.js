@@ -12,10 +12,7 @@
     var s=clean(id).replace(/[^a-zA-Z0-9]/g,'').toUpperCase();
     return (s||'PAYMENT').slice(0,8)
   }
-  function receiptNumber(transactionId,transactionDate){
-    var d=clean(transactionDate).replace(/[^0-9]/g,'').slice(0,8)||'00000000';
-    return 'MOT-'+d+'-'+compactId(transactionId)
-  }
+  function receiptNumber(transactionId){return 'PM-'+compactId(transactionId)}
   function statusFor(balance){return num(balance)<0.005?'PAID':'PART PAYMENT'}
   function baseReceipt(data){
     var out={
@@ -28,7 +25,7 @@
       previousBalance:num(data.previousBalance),
       remainingBalance:num(data.remainingBalance)
     };
-    out.receiptNumber=receiptNumber(out.transactionId,out.transactionDate);
+    out.receiptNumber=receiptNumber(out.transactionId);
     out.status=statusFor(out.remainingBalance);
     return out
   }
@@ -83,8 +80,8 @@
   function receiptText(r){
     if(!r)return '';
     var lines=[
-      'PAYMENT RECEIPT',
-      r.receiptNumber,
+      'PAYMENT RECEIPT FROM PHILIP MINGS',
+      'Receipt No. '+r.receiptNumber,
       '',
       'Received from: '+r.personName,
       'Date: '+r.transactionDate,
@@ -113,16 +110,16 @@
     var canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1350;var ctx=canvas.getContext('2d');
     ctx.fillStyle='#f5f7fb';ctx.fillRect(0,0,1080,1350);
     ctx.fillStyle='#ffffff';rounded(ctx,55,55,970,1240,34);ctx.fill();
-    ctx.fillStyle='#111827';ctx.font='700 31px system-ui, -apple-system, Segoe UI, sans-serif';ctx.fillText('PAYMENT RECEIPT',110,140);
-    ctx.fillStyle='#6b7280';ctx.font='500 24px system-ui, -apple-system, Segoe UI, sans-serif';ctx.textAlign='right';ctx.fillText(r.receiptNumber,970,140);ctx.textAlign='left';
-    ctx.fillStyle='#111827';ctx.font='700 62px system-ui, -apple-system, Segoe UI, sans-serif';ctx.fillText(moneyText(r.amount,r.currency),110,260);
-    ctx.fillStyle=r.status==='PAID'?'#ecfdf3':'#fff7ed';rounded(ctx,110,300,250,56,28);ctx.fill();
-    ctx.fillStyle=r.status==='PAID'?'#047857':'#9a3412';ctx.font='700 23px system-ui, -apple-system, Segoe UI, sans-serif';ctx.fillText(r.status,138,337);
-    ctx.strokeStyle='#e5e7eb';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(110,405);ctx.lineTo(970,405);ctx.stroke();
-    drawRow(ctx,'Received from',r.personName,480);
-    drawRow(ctx,'Date',r.transactionDate,545);
-    if(r.description)drawRow(ctx,'Reference',r.description.length>38?r.description.slice(0,35)+'…':r.description,610);
-    var start=r.description?700:635;
+    ctx.fillStyle='#111827';ctx.font='700 29px system-ui, -apple-system, Segoe UI, sans-serif';ctx.fillText('PAYMENT RECEIPT FROM PHILIP MINGS',110,140);
+    ctx.fillStyle='#6b7280';ctx.font='500 24px system-ui, -apple-system, Segoe UI, sans-serif';ctx.textAlign='right';ctx.fillText('Receipt No. '+r.receiptNumber,970,190);ctx.textAlign='left';
+    ctx.fillStyle='#111827';ctx.font='700 62px system-ui, -apple-system, Segoe UI, sans-serif';ctx.fillText(moneyText(r.amount,r.currency),110,280);
+    ctx.fillStyle=r.status==='PAID'?'#ecfdf3':'#fff7ed';rounded(ctx,110,320,250,56,28);ctx.fill();
+    ctx.fillStyle=r.status==='PAID'?'#047857':'#9a3412';ctx.font='700 23px system-ui, -apple-system, Segoe UI, sans-serif';ctx.fillText(r.status,138,357);
+    ctx.strokeStyle='#e5e7eb';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(110,425);ctx.lineTo(970,425);ctx.stroke();
+    drawRow(ctx,'Received from',r.personName,500);
+    drawRow(ctx,'Date',r.transactionDate,565);
+    if(r.description)drawRow(ctx,'Reference',r.description.length>38?r.description.slice(0,35)+'…':r.description,630);
+    var start=r.description?720:655;
     ctx.strokeStyle='#e5e7eb';ctx.beginPath();ctx.moveTo(110,start-55);ctx.lineTo(970,start-55);ctx.stroke();
     drawRow(ctx,'Previous balance',moneyText(r.previousBalance,r.currency),start);
     drawRow(ctx,'Payment received','-'+moneyText(r.amount,r.currency),start+70);
@@ -135,7 +132,7 @@
   function escHtml(v){return clean(v).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
   function printHtml(r){
     function row(label,value){return '<div class="row"><span>'+escHtml(label)+'</span><strong>'+escHtml(value)+'</strong></div>'}
-    return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+escHtml(r.receiptNumber)+'</title><style>@page{margin:18mm}*{box-sizing:border-box}body{font-family:Inter,Arial,sans-serif;color:#111827;margin:0;background:#fff}.receipt{max-width:720px;margin:auto;padding:28px}.top{display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid #e5e7eb;padding-bottom:22px}.eyebrow{font-size:13px;font-weight:800;letter-spacing:.12em}.number{font-size:12px;color:#6b7280}.amount{font-size:38px;font-weight:800;margin:30px 0 10px}.badge{display:inline-block;padding:7px 11px;border-radius:999px;background:#ecfdf3;color:#047857;font-size:12px;font-weight:800}.name{font-size:26px;font-weight:800;margin:34px 0 6px}.muted{color:#6b7280}.rows{margin-top:30px;border-top:1px solid #e5e7eb}.row{display:flex;justify-content:space-between;gap:20px;padding:16px 0;border-bottom:1px solid #f0f1f3}.row span{color:#6b7280}.footer{margin-top:42px;font-size:12px;color:#9ca3af}@media print{button{display:none}}</style></head><body><div class="receipt"><div class="top"><div class="eyebrow">PAYMENT RECEIPT</div><div class="number">'+escHtml(r.receiptNumber)+'</div></div><div class="amount">'+escHtml(moneyText(r.amount,r.currency))+'</div><div class="badge">'+escHtml(r.status)+'</div><div class="name">'+escHtml(r.personName)+'</div><div class="muted">'+escHtml(r.transactionDate)+(r.description?' · '+escHtml(r.description):'')+'</div><div class="rows">'+row('Previous balance',moneyText(r.previousBalance,r.currency))+row('Payment received','-'+moneyText(r.amount,r.currency))+row('Remaining balance',moneyText(r.remainingBalance,r.currency))+'</div><div class="footer">Money Owed Tracker · Generated from a confirmed ledger transaction.</div></div><script>window.onload=function(){setTimeout(function(){window.print()},150)}<\/script></body></html>'
+    return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+escHtml(r.receiptNumber)+'</title><style>@page{margin:18mm}*{box-sizing:border-box}body{font-family:Inter,Arial,sans-serif;color:#111827;margin:0;background:#fff}.receipt{max-width:720px;margin:auto;padding:28px}.top{display:flex;justify-content:space-between;gap:20px;border-bottom:1px solid #e5e7eb;padding-bottom:22px}.eyebrow{font-size:13px;font-weight:800;letter-spacing:.08em}.number{font-size:12px;color:#6b7280}.amount{font-size:38px;font-weight:800;margin:30px 0 10px}.badge{display:inline-block;padding:7px 11px;border-radius:999px;background:#ecfdf3;color:#047857;font-size:12px;font-weight:800}.name{font-size:26px;font-weight:800;margin:34px 0 6px}.muted{color:#6b7280}.rows{margin-top:30px;border-top:1px solid #e5e7eb}.row{display:flex;justify-content:space-between;gap:20px;padding:16px 0;border-bottom:1px solid #f0f1f3}.row span{color:#6b7280}.footer{margin-top:42px;font-size:12px;color:#9ca3af}@media print{button{display:none}}</style></head><body><div class="receipt"><div class="top"><div class="eyebrow">PAYMENT RECEIPT FROM PHILIP MINGS</div><div class="number">Receipt No. '+escHtml(r.receiptNumber)+'</div></div><div class="amount">'+escHtml(moneyText(r.amount,r.currency))+'</div><div class="badge">'+escHtml(r.status)+'</div><div class="name">'+escHtml(r.personName)+'</div><div class="muted">'+escHtml(r.transactionDate)+(r.description?' · '+escHtml(r.description):'')+'</div><div class="rows">'+row('Previous balance',moneyText(r.previousBalance,r.currency))+row('Payment received','-'+moneyText(r.amount,r.currency))+row('Remaining balance',moneyText(r.remainingBalance,r.currency))+'</div><div class="footer">Money Owed Tracker · Generated from a confirmed ledger transaction.</div></div><script>window.onload=function(){setTimeout(function(){window.print()},150)}<\/script></body></html>'
   }
   function printReceipt(r){
     if(typeof window==='undefined')throw new Error('Print unavailable');
