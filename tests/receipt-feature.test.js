@@ -12,7 +12,7 @@ assert.equal(confirmed.previousBalance, 900);
 assert.equal(confirmed.remainingBalance, 500);
 assert.equal(confirmed.status, 'PART PAYMENT');
 assert.equal(confirmed.currency, 'TTD');
-assert.ok(confirmed.receiptNumber.startsWith('MOT-20260908-'));
+assert.equal(confirmed.receiptNumber, 'PM-12345678');
 
 const paid = ReceiptTools.buildReceiptFromConfirmed(
   { transaction_id: 'paid-001', person_name: 'Avery', currency: 'TTD', previous_balance: 400, new_balance: 0 },
@@ -38,6 +38,7 @@ assert.ok(ReceiptTools.isIncomingRepayment(history[1]));
 assert.ok(!ReceiptTools.isIncomingRepayment({ transaction_type: 'repayment', signed_amount: 400 }));
 
 const text = ReceiptTools.receiptText(confirmed);
+assert.ok(text.includes('PAYMENT RECEIPT FROM PHILIP MINGS'));
 assert.ok(text.includes('Avery'));
 assert.ok(text.includes('TTD 400.00'));
 assert.ok(text.includes(confirmed.receiptNumber));
@@ -45,7 +46,9 @@ assert.ok(text.includes('TTD 500.00'));
 
 const app = fs.readFileSync('receipt-app.js', 'utf8');
 assert.ok(app.includes('receiptOverlay'));
+assert.ok(app.includes('Payment Receipt from Philip Mings'));
 assert.ok(app.includes('Share Receipt'));
+assert.ok(app.includes('Download Receipt'));
 assert.ok(app.includes('Save PDF'));
 assert.ok(app.includes("window.actionMode==='they_paid'"));
 assert.ok(app.includes('ReceiptTools.buildReceiptFromConfirmed'));
@@ -55,21 +58,21 @@ assert.ok(app.includes('ReceiptTools.printReceipt'));
 assert.ok(app.includes("navigator.serviceWorker.register('/sw.js')"));
 
 const shell = fs.readFileSync('receipt-shell.html', 'utf8');
-assert.ok(shell.includes('/receipt.js?v=18'));
-assert.ok(shell.includes('/receipt-app.js?v=18'));
-assert.ok(shell.includes("fetch('/index.html?core=v18'"));
+assert.ok(shell.includes('/receipt.js?v=19'));
+assert.ok(shell.includes('/receipt-app.js?v=19'));
+assert.ok(shell.includes("fetch('/index.html?core=v19'"));
 const injectionMatch = shell.match(/html=html\.replace\('<\/body>',('(?:[^'\\]|\\.)*')\);/);
 assert.ok(injectionMatch, 'shell injection string must be present');
 const injectedMarkup = vm.runInNewContext(injectionMatch[1]);
-assert.ok(injectedMarkup.includes('</script><script src="/receipt-app.js?v=18"></script></body>'));
+assert.ok(injectedMarkup.includes('</script><script src="/receipt-app.js?v=19"></script></body>'));
 
 const sw = fs.readFileSync('sw.js', 'utf8');
-assert.ok(sw.includes("'./receipt.js?v=18'"));
-assert.ok(sw.includes("'./receipt-app.js?v=18'"));
-assert.ok(sw.includes("'./receipt-shell.html?release=v18'"));
+assert.ok(sw.includes("'./receipt.js?v=19'"));
+assert.ok(sw.includes("'./receipt-app.js?v=19'"));
+assert.ok(sw.includes("'./receipt-shell.html?release=v19'"));
 
 const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
-assert.equal(manifest.start_url,'/receipt-shell.html?release=v18');
+assert.equal(manifest.start_url,'/receipt-shell.html?release=v19');
 
 const vercel = JSON.parse(fs.readFileSync('vercel.json','utf8'));
 assert.equal(vercel.rewrites[0].source,'/');
