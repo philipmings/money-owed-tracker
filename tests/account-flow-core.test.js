@@ -71,4 +71,25 @@ const decrease = Flow.buildAccountAdjustmentEntry({
 assert.equal(decrease.amount, 300);
 assert.equal(decrease.direction, -1);
 
+const grouped = Flow.groupFlowTransactions([
+  { id:'out', person_name:'Account · Scotia Loans', currency:'TTD', signed_amount:-9000, transaction_date:'2026-09-13', description:'Currency exchange out to RBC USD via Mel · Rate TT$7.5000 / US$1 [FLOW-GROUP]' },
+  { id:'in', person_name:'Account · RBC USD', currency:'USD', signed_amount:1200, transaction_date:'2026-09-13', description:'Currency exchange in from Scotia Loans via Mel · Rate TT$7.5000 / US$1 [FLOW-GROUP]' }
+]);
+assert.equal(grouped.length,1);
+assert.equal(grouped[0].id,'FLOW-GROUP');
+assert.equal(grouped[0].kind,'Currency exchange');
+assert.equal(grouped[0].fromAccount,'Scotia Loans');
+assert.equal(grouped[0].toAccount,'RBC USD');
+assert.equal(grouped[0].fromCurrency,'TTD');
+assert.equal(grouped[0].toCurrency,'USD');
+assert.equal(grouped[0].fromAmount,9000);
+assert.equal(grouped[0].toAmount,1200);
+assert.equal(grouped[0].reversed,false);
+
+const reversedGroup = Flow.groupFlowTransactions([
+  { id:'out', person_name:'Account · Scotia USD', currency:'USD', signed_amount:-100, transaction_date:'2026-09-13', description:'Internal transfer out to FCB USD [FLOW-REV]' },
+  { id:'reverse', person_name:'Account · Scotia USD', currency:'USD', signed_amount:100, transaction_date:'2026-09-13', description:'Automatic reversal of incomplete account flow [FLOW-REV]' }
+]);
+assert.equal(reversedGroup[0].reversed,true);
+
 console.log('account flow core checks passed');
