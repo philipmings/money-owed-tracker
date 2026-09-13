@@ -1,0 +1,31 @@
+name: Money Owed Tracker tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, 'feature/**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run regression tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for test_file in tests/*.test.js; do
+            echo "Running ${test_file}"
+            node "${test_file}"
+          done
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          node --check account-flow-core.js
+          node --check ui-v20.js
+          node --check receipt-app.js
+          node --check receipt.js
