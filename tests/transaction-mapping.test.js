@@ -1,7 +1,7 @@
 const fs = require('fs');
 const assert = require('assert');
 
-const index = fs.readFileSync('index.html', 'utf8');
+const index = fs.readFileSync('core.html', 'utf8');
 const sw = fs.readFileSync('sw.js', 'utf8');
 
 assert.ok(index.includes("['borrowed_from_them','Loan']"));
