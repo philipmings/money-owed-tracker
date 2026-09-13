@@ -141,7 +141,7 @@
   }
 
   function registerServiceWorker(){
-    if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){})
+    if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){})
   }
 
   installStyles();installMarkup();installAutomaticReceipt();installHistoryObserver();registerServiceWorker();
