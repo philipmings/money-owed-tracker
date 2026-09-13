@@ -16,8 +16,8 @@
     if(!response.ok)throw new Error('Could not load the tracker');
     var html=await response.text();
     html=html.replace(/manifest\.webmanifest\?v=\d+/,'manifest.webmanifest?v=20');
-    html=html.replace('</head>','<link rel="stylesheet" href="./ui-v20.css?v=20"></head>');
-    html=html.replace('</body>','<script src="./receipt.js?v=20"><\/script><script src="./receipt-app.js?v=20"><\/script><script src="./account-flow-core.js?v=20"><\/script><script src="./ui-v20.js?v=20"><\/script></body>');
+    html=html.replace('</head>','<link rel="stylesheet" href="./ui-v20.css?v=20"><link rel="stylesheet" href="./ui-v20-patch.css?v=20"></head>');
+    html=html.replace('</body>','<script src="./receipt.js?v=20"><\/script><script src="./receipt-app.js?v=20"><\/script><script src="./account-flow-core.js?v=20"><\/script><script src="./ui-v20.js?v=20"><\/script><script src="./ui-v20-patch.js?v=20"><\/script></body>');
     document.open();document.write(html);document.close();
   }catch(e){document.body.innerHTML='<div class="boot"><div><strong>Could not open Money Owed</strong><span>Check your connection and refresh the page.</span></div></div>'}
 })();
