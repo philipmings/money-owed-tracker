@@ -1,6 +1,5 @@
 const fs = require('fs');
 const assert = require('assert');
-const vm = require('vm');
 const ReceiptTools = require('../receipt.js');
 
 const confirmed = ReceiptTools.buildReceiptFromConfirmed(
@@ -55,24 +54,23 @@ assert.ok(app.includes('ReceiptTools.buildReceiptFromConfirmed'));
 assert.ok(app.includes('ReceiptTools.buildHistoricalReceipt'));
 assert.ok(app.includes('navigator.share'));
 assert.ok(app.includes('ReceiptTools.printReceipt'));
-assert.ok(app.includes("navigator.serviceWorker.register('/sw.js')"));
+assert.ok(app.includes("navigator.serviceWorker.register('./sw.js')"));
 
 const shell = fs.readFileSync('receipt-shell.html', 'utf8');
-assert.ok(shell.includes('/receipt.js?v=19'));
-assert.ok(shell.includes('/receipt-app.js?v=19'));
-assert.ok(shell.includes("fetch('/index.html?core=v19'"));
-const injectionMatch = shell.match(/html=html\.replace\('<\/body>',('(?:[^'\\]|\\.)*')\);/);
-assert.ok(injectionMatch, 'shell injection string must be present');
-const injectedMarkup = vm.runInNewContext(injectionMatch[1]);
-assert.ok(injectedMarkup.includes('</script><script src="/receipt-app.js?v=19"></script></body>'));
+assert.ok(shell.includes('./receipt.js?v=20'));
+assert.ok(shell.includes('./receipt-app.js?v=20'));
+assert.ok(shell.includes('./account-flow-core.js?v=20'));
+assert.ok(shell.includes('./ui-v20.js?v=20'));
+assert.ok(shell.includes("fetch('./core.html?core=v20'"));
 
 const sw = fs.readFileSync('sw.js', 'utf8');
-assert.ok(sw.includes("'./receipt.js?v=19'"));
-assert.ok(sw.includes("'./receipt-app.js?v=19'"));
-assert.ok(sw.includes("'./receipt-shell.html?release=v19'"));
+assert.ok(sw.includes("'./receipt.js?v=20'"));
+assert.ok(sw.includes("'./receipt-app.js?v=20'"));
+assert.ok(sw.includes("'./receipt-shell.html?release=v20'"));
 
 const manifest = JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
-assert.equal(manifest.start_url,'/receipt-shell.html?release=v19');
+assert.equal(manifest.start_url,'./receipt-shell.html?release=v20');
+assert.equal(manifest.scope,'./');
 
 const vercel = JSON.parse(fs.readFileSync('vercel.json','utf8'));
 assert.equal(vercel.rewrites[0].source,'/');
