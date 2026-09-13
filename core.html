@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Money Owed Tracker</title>
+<link rel="manifest" href="manifest.webmanifest?v=11">
+<link rel="apple-touch-icon" href="money-owed-apple-touch-v11.png">
+<link rel="icon" type="image/png" sizes="32x32" href="money-owed-favicon-32-v11.png">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Money Owed">
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#111827;background:#f5f7fb}
+*{box-sizing:border-box}
+body{margin:0;background:#f5f7fb}
+.app{max-width:760px;margin:auto;min-height:100vh;padding:env(safe-area-inset-top) 16px calc(92px + env(safe-area-inset-bottom))}
+header{padding:24px 2px 14px;display:flex;align-items:center;justify-content:space-between}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#6b7280}
+.title{margin:4px 0 0;font-size:28px}
+.iconbtn{border:0;background:white;border-radius:14px;width:44px;height:44px;box-shadow:0 4px 18px #11182712;font-size:20px}
+.summaryTitle{font-size:13px;font-weight:850;margin:14px 2px 8px;color:#374151}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:white;border-radius:18px;padding:15px;box-shadow:0 6px 24px #1118270d}
+.card.mine{border-top:4px solid #047857}.card.theirs{border-top:4px solid #b42318}
+.label{font-size:11px;color:#6b7280;font-weight:800;text-transform:uppercase;letter-spacing:.07em}
+.money{font-size:23px;font-weight:850;margin-top:7px}
+.sub{font-size:11px;color:#6b7280;margin-top:4px}
+.section{margin-top:20px}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sectionhead h2{font-size:17px;margin:0}
+.muted{color:#6b7280;font-size:13px}
+.search{width:100%;border:1px solid #e5e7eb;background:white;border-radius:14px;padding:13px 14px;font-size:16px;margin-bottom:10px}
+.person,.txn{background:white;border-radius:16px;padding:14px 15px;margin-bottom:9px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 3px 14px #1118270a}
+.person{cursor:pointer}.person:active{transform:scale(.995)}.personname,.txntitle{font-weight:800}
+.balances,.txndetail{font-size:12px;color:#6b7280;margin-top:4px;line-height:1.45}
+.amount{text-align:right;font-weight:800}
+.positive{color:#047857}.negative{color:#b42318}.zero{color:#6b7280}
+.empty{background:white;border:1px dashed #d1d5db;border-radius:18px;padding:24px;text-align:center;color:#6b7280}
+.fab{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom));width:min(728px,calc(100% - 32px));border:0;border-radius:18px;background:#111827;color:white;padding:16px 20px;font-size:17px;font-weight:850;box-shadow:0 14px 34px #11182755}
+.overlay{position:fixed;inset:0;background:#11182799;display:none;align-items:flex-end;justify-content:center;z-index:10}
+.sheet{background:white;width:min(760px,100%);border-radius:24px 24px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));max-height:94vh;overflow:auto}
+.handle{width:42px;height:5px;border-radius:9px;background:#d1d5db;margin:0 auto 16px}
+.sheet h2{margin:0 0 16px}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:12px;font-weight:800;color:#4b5563;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select,.field textarea{width:100%;border:1px solid #d1d5db;border-radius:13px;padding:12px 13px;font-size:16px;background:white}
+.field textarea{min-height:70px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{border:1px solid #d1d5db;background:white;border-radius:13px;padding:12px;font-weight:800}
+.seg button.on{background:#111827;color:white;border-color:#111827}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.action{border:1px solid #d1d5db;background:white;border-radius:14px;padding:13px 10px;text-align:left;min-height:72px}
+.action strong{display:block;font-size:14px}.action span{display:block;font-size:11px;color:#6b7280;margin-top:4px}
+.action.on{border-color:#111827;background:#111827;color:white}.action.on span{color:#d1d5db}
+.save{width:100%;border:0;border-radius:15px;background:#111827;color:white;padding:15px;font-weight:850;font-size:16px}
+.cancel{width:100%;border:0;background:transparent;padding:12px;color:#6b7280;font-weight:700}
+.toast{position:fixed;z-index:30;left:50%;top:18px;transform:translateX(-50%);width:min(700px,calc(100% - 30px));background:#111827;color:white;padding:14px 16px;border-radius:15px;box-shadow:0 12px 30px #11182755;display:none}
+.lock{position:fixed;inset:0;background:#f5f7fb;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+.lockbox{width:min(420px,100%);background:white;padding:26px;border-radius:24px;box-shadow:0 18px 50px #11182718}
+.lockbox h1{margin:0 0 8px;font-size:26px}
+.lockbox p{color:#6b7280;line-height:1.45}
+.lockbox input{width:100%;padding:13px 14px;border:1px solid #d1d5db;border-radius:13px;font-size:16px}
+.lockbox button{width:100%;margin-top:10px;border:0;border-radius:13px;background:#111827;color:white;padding:13px;font-weight:800;font-size:16px}
+.smallbtn{border:0;background:transparent;color:#374151;font-weight:750}
+.status{font-size:12px;color:#b42318;margin-top:10px;min-height:18px}
+@media(max-width:460px){.money{font-size:20px}.card{padding:13px}.row{grid-template-columns:1fr}.actions{grid-template-columns:1fr 1fr}}
+
+.statementSheet{background:white;width:min(760px,100%);border-radius:24px 24px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom));max-height:94vh;overflow:auto}
+.statementTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.statementTop h2{margin:0;font-size:23px}.closex{border:0;background:#f3f4f6;border-radius:12px;width:40px;height:40px;font-size:21px}
+.statementBalances{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 16px}
+.statementBalance{border-radius:15px;padding:13px;background:#f9fafb}
+.statementBalance .btitle{font-size:11px;font-weight:850;color:#6b7280;text-transform:uppercase;letter-spacing:.06em}
+.statementBalance .bvalue{font-size:16px;font-weight:850;margin-top:6px}
+.exportGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.exportbtn{border:0;border-radius:14px;padding:13px 10px;font-size:14px;font-weight:850}
+.exportbtn.pdf{background:#111827;color:white}.exportbtn.xlsx{background:#e8f5ee;color:#065f46}
+.statementTx{border-top:1px solid #e5e7eb;padding:12px 0}
+.statementTx:first-child{border-top:0}.statementTxHead{display:flex;justify-content:space-between;gap:12px;font-weight:800;font-size:13px}
+.statementTxSub{font-size:12px;color:#6b7280;margin-top:4px;line-height:1.4}
+.statementHint{font-size:12px;color:#6b7280;margin:-8px 0 14px}
+
+
+
+
+/* FINAL TRANSACTION TYPOGRAPHY */
+.txnmain{min-width:0;flex:1}
+.txntitle{font-weight:800;line-height:1.3}
+.txndetail{font-weight:400}
+.txnamount{text-align:right;font-weight:400;white-space:nowrap}
+.statementTxHead{font-weight:400}
+.statementCategory{font-weight:800}
+.statementAmount{font-weight:400;white-space:nowrap}
+.statementTxSub{font-weight:400}
+
+
+/* SUMMARY DRILL-DOWN */
+.summaryCard{
+  appearance:none;-webkit-appearance:none;width:100%;text-align:left;font:inherit;
+  cursor:pointer;border:1px solid transparent;
+  transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease;
+}
+.summaryCard:active{transform:scale(.985)}
+.summaryCard.active{
+  border-color:#2563eb;
+  box-shadow:0 0 0 3px rgba(37,99,235,.12),0 8px 24px rgba(15,23,42,.10);
+}
+.filterBanner{
+  margin:10px 0 8px;padding:11px 12px;border-radius:12px;
+  background:#eef5ff;border:1px solid #cfe0f7;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.filterBanner[hidden]{display:none}
+.filterBanner strong{display:block;font-size:13px;color:#173f70}
+.filterBanner span{display:block;margin-top:2px;font-size:12px;color:#64748b;font-weight:400}
+.clearFilter{
+  appearance:none;border:0;background:#fff;color:#173f70;font-weight:700;
+  padding:7px 10px;border-radius:9px;box-shadow:0 1px 4px rgba(15,23,42,.08);
+}
+.personFilteredAmount{font-weight:700;white-space:nowrap}
+
+
+#recentList{display:none!important}
+.recentSection{display:none!important}
+
+/* V13 UI */
+.summaryCard .label{font-size:22px;line-height:1}
+.currencyFlag{font-size:18px}
+
+
+
+/* POWER FEATURES */
+.dynamicGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.featureCard{margin-top:14px;background:white;border-radius:16px;box-shadow:0 3px 14px #1118270a;overflow:hidden}
+.featureCard summary{list-style:none;cursor:pointer;padding:14px 15px;font-weight:850;display:flex;justify-content:space-between;align-items:center}
+.featureCard summary::-webkit-details-marker{display:none}
+.featureBody{padding:0 14px 14px}
+.toolGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.toolbtn,.quickbtn,.metaBtn,.settleBtn{border:0;border-radius:12px;padding:11px 10px;font-weight:800;background:#eef2f7;color:#25324a}
+.toolbtn.danger{background:#fff1f0;color:#a1231b}.toolbtn.primary{background:#111827;color:white}
+.searchResults{display:none;margin:0 0 10px}
+.searchResult{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:11px 12px;margin-bottom:7px;cursor:pointer}
+.searchResultTitle{font-weight:800;font-size:13px}.searchResultSub{font-size:11px;color:#6b7280;margin-top:4px;line-height:1.4}
+.pin{font-size:14px;margin-right:5px}.followBadge{display:inline-block;margin-top:5px;padding:3px 7px;border-radius:999px;background:#fff7df;color:#8a5b00;font-size:10px;font-weight:800}
+.followBadge.overdue{background:#fff0ef;color:#a1231b}
+.archivedTag{display:inline-block;margin-left:5px;padding:2px 6px;border-radius:999px;background:#eef2f7;color:#667085;font-size:9px;font-weight:800}
+.monthCurrency{background:#f8fafc;border-radius:13px;padding:11px;margin-top:8px}
+.monthCurrency strong{font-size:17px}.monthLines{font-size:12px;color:#667085;line-height:1.55;margin-top:4px}
+.statementActions{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0 14px}
+.quickbtn{padding:9px 5px;font-size:11px}
+.statementMeta{background:#f8fafc;border-radius:15px;padding:12px;margin:12px 0}
+.statementMeta .field{margin-bottom:9px}.statementMeta .field:last-child{margin-bottom:0}
+.metaActions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.metaBtn{font-size:12px;padding:9px 11px}
+.metaBtn.active{background:#fff7df;color:#8a5b00}.metaBtn.archive{background:#fff1f0;color:#a1231b}
+.balanceCard{position:relative}.settleBtn{margin-top:8px;padding:7px 9px;font-size:11px;background:#e8f5ee;color:#067647}
+.historyWrap{margin:14px 0}.historyTitle{font-size:13px;font-weight:850;margin-bottom:8px}
+.sparkCard{background:#f8fafc;border-radius:13px;padding:10px;margin-bottom:8px}
+.sparkTop{display:flex;justify-content:space-between;font-size:11px;font-weight:800;margin-bottom:5px}
+.spark{width:100%;height:70px;display:block}
+.currencyChooser{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
+.currencyChooser button{border:1px solid #d1d5db;background:white;border-radius:13px;padding:11px;font-size:20px}
+.currencyChooser button.on{background:#111827;border-color:#111827}
+.currencyChooser select{border:1px solid #d1d5db;background:white;border-radius:13px;padding:10px;max-width:145px}
+.sectionTools{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px}
+.miniToggle{border:0;border-radius:999px;background:#eef2f7;padding:7px 10px;font-size:11px;font-weight:800;color:#475467}
+.miniToggle.on{background:#dbeafe;color:#174ea6}
+.allSettled{font-size:12px;color:#6b7280}
+@media(max-width:460px){.statementActions{grid-template-columns:1fr 1fr}.toolGrid{grid-template-columns:1fr 1fr}.dynamicGrid{grid-template-columns:1fr 1fr}}
+
+</style>
+<meta name="app-build" content="power-features-v14-2026-08-26">
+</head>
+<body data-build="v14">
+<div class="lock" id="lock">
+  <div class="lockbox">
+    <div class="eyebrow">Private ledger</div>
+    <h1>Money Owed Tracker</h1>
+    <p>Enter your private access key. This device can remember it.</p>
+    <input id="keyInput" type="password" placeholder="Access key">
+    <button id="unlockBtn">Unlock</button>
+    <div class="status" id="lockStatus"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="app">
+<header>
+  <div><div class="eyebrow">Personal ledger</div><h1 class="title">Money Owed</h1></div>
+  <button class="iconbtn" id="refreshBtn">↻</button>
+</header>
+
+<div class="summaryTitle">Owed to me</div>
+<div class="dynamicGrid" id="toMeGrid"></div>
+
+<div class="summaryTitle">I owe</div>
+<div class="dynamicGrid" id="iOweGrid"></div>
+
+<section class="section">
+  <div class="sectionhead"><h2>Person&#39;s Name</h2><span class="muted" id="peopleCount">0 people</span></div>
+  <input class="search" id="search" placeholder="Search person, invoice or order #">
+  <div class="searchResults" id="searchResults"></div>
+  <div class="filterBanner" id="filterBanner" hidden>
+    <div><strong id="filterTitle"></strong><span id="filterTotal"></span></div>
+    <button type="button" class="clearFilter" id="clearBalanceFilter">Clear</button>
+  </div>
+  <div class="sectionTools">
+    <button class="miniToggle" id="showArchivedBtn" type="button">Archived</button>
+  </div>
+  <div id="peopleList"></div>
+</section>
+
+<details class="featureCard" id="monthlyCard">
+  <summary><span>📊 This month</span><span class="muted">Summary</span></summary>
+  <div class="featureBody" id="monthlySummary"><div class="muted">Loading…</div></div>
+</details>
+
+<details class="featureCard">
+  <summary><span>⚙️ Tools</span><span class="muted">More</span></summary>
+  <div class="featureBody">
+    <div class="toolGrid">
+      <button class="toolbtn danger" id="undoBtn" type="button">↶ Undo last entry</button>
+      <button class="toolbtn" id="archiveSettledBtn" type="button">Archive settled</button>
+      <button class="toolbtn primary" id="exportAllPdf" type="button">Export all PDF</button>
+      <button class="toolbtn" id="exportAllExcel" type="button">Export all Excel</button>
+    </div>
+  </div>
+</details>
+
+<button class="fab" id="addBtn">＋ Add transaction</button>
+</div>
+
+<div class="overlay" id="overlay">
+<div class="sheet">
+<div class="handle"></div>
+<h2>Add transaction</h2>
+<form id="form">
+<div class="field">
+<label>What happened?</label>
+<div class="actions">
+  <button type="button" class="action on" data-action="they_owe"><strong>They owe me</strong><span>Loan, purchase or adjustment</span></button>
+  <button type="button" class="action" data-action="they_paid"><strong>They paid me</strong><span>Repayment</span></button>
+  <button type="button" class="action" data-action="i_owe"><strong>I owe them</strong><span>Loan, purchase or adjustment</span></button>
+  <button type="button" class="action" data-action="i_paid"><strong>I paid them</strong><span>Repayment</span></button>
+</div>
+</div>
+
+<div class="field"><label>Person</label><input id="person" required placeholder="Name"></div>
+
+<div class="row">
+<div class="field">
+<label>Currency</label>
+<div class="currencyChooser">
+  <button type="button" class="on" data-cur="TTD">🇹🇹</button>
+  <button type="button" data-cur="USD">🇺🇸</button>
+  <select id="otherCurrency" title="Other currency"></select>
+</div>
+</div>
+<div class="field"><label>Amount</label><input id="amount" required type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00"></div>
+</div>
+
+<div class="field" id="categoryField"><label>Category</label><select id="type"></select></div>
+<div class="field"><label>Date</label><input id="date" type="date" required></div>
+<div class="field"><label>Details / Invoice # (optional)</label><textarea id="description" placeholder="Invoice #, order #, item details, note, etc."></textarea></div>
+<button class="save" id="saveBtn" type="submit">Save transaction</button>
+<button class="cancel" id="cancelBtn" type="button">Cancel</button>
+</form>
+</div>
+</div>
+
+<div class="overlay" id="statementOverlay">
+  <div class="statementSheet">
+    <div class="handle"></div>
+    <div class="statementTop">
+      <div>
+        <div class="eyebrow">Person statement</div>
+        <h2 id="statementName">Statement</h2>
+      </div>
+      <button class="closex" id="statementClose" type="button">×</button>
+    </div>
+
+    <div class="metaActions">
+      <button class="metaBtn" id="pinBtn" type="button">☆ Pin</button>
+      <button class="metaBtn archive" id="archivePersonBtn" type="button">Archive</button>
+    </div>
+
+    <div class="statementBalances" id="statementBalances"></div>
+
+    <div class="statementActions">
+      <button class="quickbtn" data-quick="cash_loan" type="button">＋ Loan</button>
+      <button class="quickbtn" data-quick="purchase_on_behalf" type="button">＋ Purchases</button>
+      <button class="quickbtn" data-quick="repayment" type="button">＋ Repayment</button>
+      <button class="quickbtn" data-quick="adjustment" type="button">＋ Adjustment</button>
+    </div>
+
+    <div class="statementMeta">
+      <div class="field"><label>Follow-up date</label><input id="followDate" type="date"></div>
+      <div class="field"><label>Follow-up note</label><input id="followNote" placeholder="Call, collect payment, send invoice…"></div>
+      <div class="field"><label>General notes</label><textarea id="personNotes" placeholder="Optional notes about this person"></textarea></div>
+      <button class="toolbtn primary" id="savePersonMeta" type="button">Save person details</button>
+    </div>
+
+    <div class="historyWrap">
+      <div class="historyTitle">Balance history</div>
+      <div id="balanceHistory"></div>
+    </div>
+
+    <div class="exportGrid">
+      <button class="exportbtn pdf" id="exportPdf" type="button">Share / Export PDF</button>
+      <button class="exportbtn xlsx" id="exportExcel" type="button">Share / Export Excel</button>
+    </div>
+    <div class="statementHint">Reports keep the formal currency codes such as TTD, USD, GBP and EUR.</div>
+    <div class="sectionhead"><h2>Transaction history</h2><span class="muted" id="statementCount"></span></div>
+    <div id="statementTransactions"></div>
+  </div>
+</div>
+
+<script>
+var API_CLASSIC='https://yjdjljrwmdbmrlinkvxc.supabase.co/functions/v1/money-owed-api',
+API='https://yjdjljrwmdbmrlinkvxc.supabase.co/functions/v1/money-owed-tools',
+accessKey=localStorage.getItem('moneyOwedAccessKey')||'',
+currency='TTD',actionMode='they_owe',direction=1,
+dashboard={balances:[],summary:[],people_meta:[]},
+selectedPerson=null,balanceFilter=null,showArchived=false,searchTimer=null,monthData=null;
+
+function el(id){return document.getElementById(id)}
+function fmt(n){return new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n||0))}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
+function showToast(m){el('toast').textContent=m;el('toast').style.display='block';setTimeout(function(){el('toast').style.display='none'},4200)}
+function today(){return new Date().toISOString().slice(0,10)}
+
+var currencyCountries={
+USD:'US',TTD:'TT',EUR:'EU',GBP:'GB',CAD:'CA',AUD:'AU',NZD:'NZ',JPY:'JP',CNY:'CN',HKD:'HK',SGD:'SG',INR:'IN',
+AED:'AE',SAR:'SA',QAR:'QA',KWD:'KW',BHD:'BH',OMR:'OM',JOD:'JO',ILS:'IL',TRY:'TR',ZAR:'ZA',NGN:'NG',GHS:'GH',
+KES:'KE',UGX:'UG',TZS:'TZ',RWF:'RW',EGP:'EG',MAD:'MA',DZD:'DZ',TND:'TN',BRL:'BR',ARS:'AR',CLP:'CL',COP:'CO',
+PEN:'PE',UYU:'UY',PYG:'PY',BOB:'BO',MXN:'MX',GTQ:'GT',HNL:'HN',NIO:'NI',CRC:'CR',PAB:'PA',DOP:'DO',JMD:'JM',
+BBD:'BB',BSD:'BS',BZD:'BZ',GYD:'GY',SRD:'SR',HTG:'HT',CHF:'CH',SEK:'SE',NOK:'NO',DKK:'DK',PLN:'PL',CZK:'CZ',
+HUF:'HU',RON:'RO',BGN:'BG',ISK:'IS',UAH:'UA',RUB:'RU',RSD:'RS',MKD:'MK',ALL:'AL',BAM:'BA',GEL:'GE',AMD:'AM',
+AZN:'AZ',KZT:'KZ',UZS:'UZ',PKR:'PK',BDT:'BD',LKR:'LK',NPR:'NP',MMK:'MM',THB:'TH',VND:'VN',MYR:'MY',IDR:'ID',
+PHP:'PH',KRW:'KR',TWD:'TW',MOP:'MO',BND:'BN',KHR:'KH',LAK:'LA',MNT:'MN',FJD:'FJ',PGK:'PG',WST:'WS',TOP:'TO',
+SBD:'SB',VUV:'VU'
+};
+var currencyNames={
+TTD:'Trinidad & Tobago dollar',USD:'US dollar',GYD:'Guyana dollar',BBD:'Barbados dollar',XCD:'Eastern Caribbean dollar',
+CAD:'Canadian dollar',EUR:'Euro',GBP:'British pound',AUD:'Australian dollar',NZD:'New Zealand dollar',JPY:'Japanese yen',
+CNY:'Chinese yuan',HKD:'Hong Kong dollar',SGD:'Singapore dollar',INR:'Indian rupee',AED:'UAE dirham',SAR:'Saudi riyal',
+ZAR:'South African rand',MXN:'Mexican peso',BRL:'Brazilian real',CHF:'Swiss franc',SEK:'Swedish krona',NOK:'Norwegian krone',
+DKK:'Danish krone',JMD:'Jamaican dollar',BSD:'Bahamian dollar',BZD:'Belize dollar',DOP:'Dominican peso'
+};
+var symbols={TTD:'TT$',USD:'$',EUR:'€',GBP:'£',JPY:'¥',CNY:'¥',INR:'₹',KRW:'₩',CAD:'C$',AUD:'A$',NZD:'NZ$',HKD:'HK$',SGD:'S$',GYD:'G$',BBD:'Bds$',XCD:'EC$'};
+
+function flagFromCountry(cc){
+  if(cc==='EU')return '🇪🇺';
+  if(!cc||cc.length!==2)return '🌐';
+  return String.fromCodePoint.apply(String,[...cc.toUpperCase()].map(function(ch){return 127397+ch.charCodeAt()}))
+}
+function currencyFlag(c){
+  c=String(c||'').toUpperCase();
+  if(c==='XCD')return '🌴';
+  if(c==='XOF'||c==='XAF')return '🌍';
+  if(c==='EUR')return '🇪🇺';
+  if(currencyCountries[c])return flagFromCountry(currencyCountries[c]);
+  if(/^[A-Z]{3}$/.test(c))return flagFromCountry(c.slice(0,2));
+  return '🌐'
+}
+function money(n,c){
+  c=String(c||'').toUpperCase();
+  var s=symbols[c];
+  return s?s+fmt(n):currencyFlag(c)+' '+fmt(n)
+}
+function labelType(t){
+  return({cash_loan:'Loan',borrowed_from_them:'Loan',amazon_purchase:'Purchases',purchase_on_behalf:'Purchases',
+  they_bought_for_me:'Purchases',repayment:'Repayment',they_paid_me:'Repayment',paid_them:'Repayment',
+  adjustment:'Adjustment',other:'Other'})[t]||'Other'
+}
+function isGenericDescription(v){
+  return new Set(['amazon for them','amazon purchase for them','amazon purchase','bought for them','other purchase for them',
+  'purchase on behalf','purchase for them','cash loan to them','they borrowed','cash borrowed','i borrowed',
+  'i borrowed money from them','they bought something for me','they bought for me','they paid me','i paid them',
+  'payment received','payment made']).has(String(v||'').trim().toLowerCase())
+}
+function displayCategory(t){
+  var type=String(t.transaction_type||''),desc=String(t.description||'').trim();
+  if(type!=='other')return labelType(type);
+  return desc&&!isGenericDescription(desc)?desc:'Other'
+}
+function detailText(t){
+  var p=[String(t.transaction_date||'')],d=String(t.description||'').trim();
+  if(d&&!isGenericDescription(d)&&String(t.transaction_type||'')!=='other')p.push(d);
+  p.push(currencyFlag(t.currency)); return p.filter(Boolean).join(' · ')
+}
+function balancePhrase(name,amount,c){
+  amount=Number(amount||0);if(amount>0)return name+' owes me '+money(amount,c);
+  if(amount<0)return 'I owe '+name+' '+money(Math.abs(amount),c);return 'Settled'
+}
+
+async function api(path,opts){
+  opts=opts||{};var h=opts.headers||{};h.Authorization='Bearer '+accessKey;if(opts.body)h['Content-Type']='application/json';
+  var r=await fetch(API+(path||''),Object.assign({},opts,{headers:h})),d={};try{d=await r.json()}catch(e){}
+  if(!r.ok)throw new Error(d.error||'Request failed');return d
+}
+async function unlock(){
+  accessKey=el('keyInput').value.trim();el('lockStatus').textContent='';
+  try{await api('?action=ping');localStorage.setItem('moneyOwedAccessKey',accessKey);el('lock').style.display='none';await load()}
+  catch(e){el('lockStatus').textContent='That access key did not work.'}
+}
+async function load(){
+  try{
+    dashboard=await api('?action=dashboard');render();loadMonthly();
+  }catch(e){
+    if(e.message==='Unauthorized'){localStorage.removeItem('moneyOwedAccessKey');el('lock').style.display='flex'}
+    else showToast('Could not load ledger: '+e.message)
+  }
+}
+function metaMap(){var m={};(dashboard.people_meta||[]).forEach(function(p){m[p.id]=p});return m}
+function allCurrencies(){
+  var s=new Set(['TTD','USD']);(dashboard.summary||[]).forEach(function(x){s.add(x.currency)});
+  (dashboard.balances||[]).forEach(function(x){s.add(x.currency)});
+  return Array.from(s).sort(function(a,b){return (a==='TTD'?-2:a==='USD'?-1:0)-(b==='TTD'?-2:b==='USD'?-1:0)||a.localeCompare(b)})
+}
+function summaryTotals(){
+  var t={};allCurrencies().forEach(function(c){t[c]={toMe:0,iOwe:0}});
+  (dashboard.summary||[]).forEach(function(s){t[s.currency]={toMe:Number(s.total_owed_to_me||0),iOwe:Number(s.total_i_owe||0)}});return t
+}
+function renderSummary(){
+  var totals=summaryTotals(),currs=allCurrencies().filter(function(c){return c==='TTD'||c==='USD'||totals[c].toMe||totals[c].iOwe});
+  function cards(kind,cls){
+    return currs.map(function(c){
+      var v=totals[c][kind],active=balanceFilter&&balanceFilter.kind===kind&&balanceFilter.currency===c?' active':'';
+      return '<button type="button" class="card '+cls+' summaryCard'+active+'" data-balance-filter="'+kind+'" data-currency="'+c+'"><div class="label">'+currencyFlag(c)+'</div><div class="money">'+money(v,c)+'</div></button>'
+    }).join('')
+  }
+  el('toMeGrid').innerHTML=cards('toMe','mine');el('iOweGrid').innerHTML=cards('iOwe','theirs');
+  document.querySelectorAll('.summaryCard').forEach(function(card){card.onclick=function(){
+    var next={kind:card.dataset.balanceFilter,currency:card.dataset.currency};
+    balanceFilter=balanceFilter&&balanceFilter.kind===next.kind&&balanceFilter.currency===next.currency?null:next;
+    el('search').value='';el('searchResults').style.display='none';render();
+    document.querySelector('.section').scrollIntoView({behavior:'smooth',block:'start'})
+  }})
+}
+function buildPeople(){
+  var mm=metaMap(),map=new Map();
+  Object.keys(mm).forEach(function(id){var p=mm[id];map.set(id,{id:id,name:p.name,balances:{},meta:p})});
+  (dashboard.balances||[]).forEach(function(b){
+    if(!map.has(b.person_id))map.set(b.person_id,{id:b.person_id,name:b.person_name,balances:{},meta:{}});
+    map.get(b.person_id).balances[b.currency]=Number(b.balance||0)
+  });return Array.from(map.values())
+}
+function personBalanceText(p){
+  var parts=[];Object.keys(p.balances).sort().forEach(function(c){var v=Number(p.balances[c]||0);if(Math.abs(v)>=.005)parts.push(balancePhrase(p.name,v,c))});
+  return parts.length?parts.join(' · '):'Settled'
+}
+function followBadge(p){
+  if(!p.meta.follow_up_date)return '';
+  var over=p.meta.follow_up_date<today()?' overdue':'';
+  return '<span class="followBadge'+over+'">Follow up '+esc(p.meta.follow_up_date)+'</span>'
+}
+function render(){
+  renderSummary();
+  var people=buildPeople(),q=el('search').value.trim().toLowerCase();
+  people=people.filter(function(p){
+    if(!showArchived&&p.meta.archived)return false;if(showArchived&&!p.meta.archived)return false;
+    if(q&&p.name.toLowerCase().indexOf(q)<0)return false;
+    if(balanceFilter){var v=Number(p.balances[balanceFilter.currency]||0);if(balanceFilter.kind==='toMe'?v<=0:v>=0)return false}
+    return true
+  });
+  people.sort(function(a,b){return Number(!!b.meta.pinned)-Number(!!a.meta.pinned)||a.name.localeCompare(b.name)});
+  if(balanceFilter){
+    var kind=balanceFilter.kind==='toMe'?'Owed to me':'I owe',sum=people.reduce(function(z,p){return z+Math.abs(Number(p.balances[balanceFilter.currency]||0))},0);
+    el('filterBanner').hidden=false;el('filterTitle').textContent=kind+' · '+currencyFlag(balanceFilter.currency);
+    el('filterTotal').textContent='Showing '+money(sum,balanceFilter.currency)+' across '+people.length+' '+(people.length===1?'person':'people')
+  }else el('filterBanner').hidden=true;
+  el('peopleCount').textContent=people.length+' '+(people.length===1?'person':'people');
+  el('showArchivedBtn').classList.toggle('on',showArchived);el('showArchivedBtn').textContent=showArchived?'Active people':'Archived';
+  if(!people.length)el('peopleList').innerHTML='<div class="empty">'+(showArchived?'No archived people.':'No matching person.')+'</div>';
+  else el('peopleList').innerHTML=people.map(function(p){
+    var balHtml='';
+    if(balanceFilter){var v=Number(p.balances[balanceFilter.currency]||0);balHtml='<div class="personFilteredAmount '+(v>0?'positive':'negative')+'">'+money(Math.abs(v),balanceFilter.currency)+'</div>'}
+    else balHtml='<div class="amount">'+(Object.values(p.balances).some(function(v){return Math.abs(Number(v))>=.005})?'View ›':'Settled')+'</div>';
+    return '<div class="person" data-person-id="'+esc(p.id)+'"><div><div class="personname">'+(p.meta.pinned?'<span class="pin">📌</span>':'')+esc(p.name)+(p.meta.archived?'<span class="archivedTag">ARCHIVED</span>':'')+'</div><div class="balances">'+esc(personBalanceText(p))+'</div>'+followBadge(p)+'</div>'+balHtml+'</div>'
+  }).join('');
+  document.querySelectorAll('[data-person-id]').forEach(function(x){x.onclick=function(){openStatement(x.dataset.personId)}})
+}
+async function doSearch(){
+  var q=el('search').value.trim(),box=el('searchResults');render();
+  if(q.length<2){box.style.display='none';box.innerHTML='';return}
+  try{
+    var d=await api('?action=search&q='+encodeURIComponent(q)),r=d.results||[];
+    if(!r.length){box.style.display='none';box.innerHTML='';return}
+    box.style.display='block';box.innerHTML=r.map(function(t){
+      var name=t.people&&t.people.name?t.people.name:'Unknown',s=Number(t.signed_amount||0);
+      return '<div class="searchResult" data-search-person="'+esc(t.person_id)+'"><div class="searchResultTitle">'+esc(name)+' · '+esc(displayCategory(t))+'</div><div class="searchResultSub">'+esc(t.transaction_date+' · '+(t.description||'')+' · '+currencyFlag(t.currency))+' · '+money(Math.abs(s),t.currency)+'</div></div>'
+    }).join('');
+    document.querySelectorAll('[data-search-person]').forEach(function(x){x.onclick=function(){openStatement(x.dataset.searchPerson)}})
+  }catch(e){}
+}
+async function loadMonthly(){
+  try{monthData=await api('?action=monthly_summary');renderMonthly()}catch(e){el('monthlySummary').innerHTML='<div class="muted">Monthly summary unavailable.</div>'}
+}
+function renderMonthly(){
+  var stats=monthData&&monthData.stats||[];
+  if(!stats.length){el('monthlySummary').innerHTML='<div class="allSettled">No activity recorded this month.</div>';return}
+  el('monthlySummary').innerHTML=stats.map(function(s){
+    var lines=[];
+    if(s.loans)lines.push('Loans: '+money(s.loans,s.currency));
+    if(s.purchases)lines.push('Purchases: '+money(s.purchases,s.currency));
+    if(s.repaid_to_me)lines.push('Repaid to me: '+money(s.repaid_to_me,s.currency));
+    if(s.i_repaid)lines.push('I repaid: '+money(s.i_repaid,s.currency));
+    if(s.adjustments)lines.push('Adjustments: '+money(s.adjustments,s.currency));
+    return '<div class="monthCurrency"><strong>'+currencyFlag(s.currency)+'</strong><div class="monthLines">'+esc(lines.join(' · ')||s.count+' entries')+'</div></div>'
+  }).join('')
+}
+function renderStatementBalances(){
+  var b=selectedPerson.balances||{},currs=Object.keys(b).filter(function(c){return Math.abs(Number(b[c]||0))>=.005});
+  if(!currs.length)currs=['TTD','USD'];
+  el('statementBalances').innerHTML=currs.map(function(c){
+    var v=Number(b[c]||0),settle=Math.abs(v)>=.005?'<button class="settleBtn" data-settle="'+c+'" type="button">Settle '+currencyFlag(c)+'</button>':'';
+    return '<div class="statementBalance balanceCard"><div class="btitle">'+currencyFlag(c)+'</div><div class="bvalue '+(v>0?'positive':v<0?'negative':'zero')+'">'+esc(balancePhrase(selectedPerson.name,v,c))+'</div>'+settle+'</div>'
+  }).join('');
+  document.querySelectorAll('[data-settle]').forEach(function(x){x.onclick=function(){settleBalance(x.dataset.settle)}})
+}
+function renderHistory(){
+  var ts=[...(selectedPerson.transactions||[])].reverse(),currs={};
+  ts.forEach(function(t){(currs[t.currency]||(currs[t.currency]=[])).push(t)});
+  var html='';
+  Object.keys(currs).sort().forEach(function(c){
+    var run=0,vals=currs[c].map(function(t){run+=Number(t.signed_amount||0);return run});
+    if(!vals.length)return;var min=Math.min(0,...vals),max=Math.max(0,...vals),span=max-min||1,w=300,h=62;
+    var pts=vals.map(function(v,i){var x=vals.length===1?w/2:(i/(vals.length-1))*w,y=h-6-((v-min)/span)*(h-12);return x.toFixed(1)+','+y.toFixed(1)}).join(' ');
+    var zy=(h-6-((0-min)/span)*(h-12)).toFixed(1);
+    html+='<div class="sparkCard"><div class="sparkTop"><span>'+currencyFlag(c)+'</span><span>'+money(vals[vals.length-1],c)+'</span></div><svg class="spark" viewBox="0 0 300 62" preserveAspectRatio="none"><line x1="0" x2="300" y1="'+zy+'" y2="'+zy+'" stroke="#d1d5db" stroke-width="1"/><polyline points="'+pts+'" fill="none" stroke="#315f9e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+  });el('balanceHistory').innerHTML=html||'<div class="muted">No history yet.</div>'
+}
+async function openStatement(id){
+  try{
+    el('statementOverlay').style.display='flex';el('statementName').textContent='Loading…';el('statementTransactions').innerHTML='<div class="empty">Loading…</div>';
+    var d=await api('?action=transactions&person_id='+encodeURIComponent(id));
+    selectedPerson={id:id,name:d.person.name,balances:d.balances||{},transactions:d.transactions||[],meta:d.person};
+    el('statementName').textContent=selectedPerson.name;renderStatementBalances();renderHistory();
+    el('statementCount').textContent=selectedPerson.transactions.length+' '+(selectedPerson.transactions.length===1?'entry':'entries');
+    el('followDate').value=selectedPerson.meta.follow_up_date||'';el('followNote').value=selectedPerson.meta.follow_up_note||'';el('personNotes').value=selectedPerson.meta.notes||'';
+    el('pinBtn').textContent=selectedPerson.meta.pinned?'📌 Unpin':'☆ Pin';el('pinBtn').classList.toggle('active',!!selectedPerson.meta.pinned);
+    var settled=Object.values(selectedPerson.balances).every(function(v){return Math.abs(Number(v||0))<.005});
+    el('archivePersonBtn').style.display=(settled||selectedPerson.meta.archived)?'inline-block':'none';
+    el('archivePersonBtn').textContent=selectedPerson.meta.archived?'Restore':'Archive';
+    el('statementTransactions').innerHTML=selectedPerson.transactions.length?selectedPerson.transactions.map(function(t){
+      var s=Number(t.signed_amount||0);
+      return '<div class="statementTx"><div class="statementTxHead"><span class="statementCategory">'+esc(displayCategory(t))+'</span><span class="statementAmount '+(s>=0?'positive':'negative')+'">'+(s>=0?'+':'−')+money(Math.abs(s),t.currency)+'</span></div><div class="statementTxSub">'+esc(detailText(t))+'</div></div>'
+    }).join(''):'<div class="empty">No transactions recorded.</div>'
+  }catch(e){showToast('Could not open statement: '+e.message);el('statementOverlay').style.display='none'}
+}
+function closeStatement(){el('statementOverlay').style.display='none'}
+async function settleBalance(c){
+  if(!selectedPerson||!confirm('Settle the full '+currencyFlag(c)+' balance for '+selectedPerson.name+'?'))return;
+  try{await api('?action=settle',{method:'POST',body:JSON.stringify({person_id:selectedPerson.id,currency:c})});showToast('Balance settled.');await load();await openStatement(selectedPerson.id)}
+  catch(e){showToast(e.message)}
+}
+async function savePersonMeta(){
+  if(!selectedPerson)return;
+  try{
+    var d=await api('?action=person_update',{method:'POST',body:JSON.stringify({person_id:selectedPerson.id,follow_up_date:el('followDate').value||null,follow_up_note:el('followNote').value,notes:el('personNotes').value})});
+    selectedPerson.meta=d.person||selectedPerson.meta;showToast('Person details saved.');await load()
+  }catch(e){showToast(e.message)}
+}
+async function togglePin(){
+  if(!selectedPerson)return;try{var d=await api('?action=person_update',{method:'POST',body:JSON.stringify({person_id:selectedPerson.id,pinned:!selectedPerson.meta.pinned})});selectedPerson.meta=d.person;el('pinBtn').textContent=selectedPerson.meta.pinned?'📌 Unpin':'☆ Pin';el('pinBtn').classList.toggle('active',!!selectedPerson.meta.pinned);await load()}catch(e){showToast(e.message)}
+}
+async function toggleArchive(){
+  if(!selectedPerson)return;try{var target=!selectedPerson.meta.archived,d=await api('?action=person_update',{method:'POST',body:JSON.stringify({person_id:selectedPerson.id,archived:target})});selectedPerson.meta=d.person;showToast(target?'Person archived.':'Person restored.');closeStatement();await load()}catch(e){showToast(e.message)}
+}
+function quickAdd(type){
+  if(!selectedPerson)return;var keep=selectedPerson;closeStatement();openSheet();el('person').value=keep.name;
+  var nonzero=Object.entries(keep.balances).filter(function(x){return Math.abs(Number(x[1]))>=.005});
+  if(nonzero.length)setCur(nonzero[0][0]);
+  if(type==='repayment'){
+    var pos=nonzero.filter(function(x){return Number(x[1])>0}),neg=nonzero.filter(function(x){return Number(x[1])<0});
+    setAction(pos.length?'they_paid':neg.length?'i_paid':'they_paid')
+  }else{
+    var onlyNeg=nonzero.length&&nonzero.every(function(x){return Number(x[1])<0});setAction(onlyNeg?'i_owe':'they_owe');
+    setTimeout(function(){var sel=el('type');for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===type){sel.value=type;break}}},0)
+  }
+  setTimeout(function(){el('amount').focus()},120)
+}
+async function undoLast(){
+  if(!confirm('Undo the most recent ledger entry? A reversal entry will be created so the audit history stays intact.'))return;
+  try{var d=await api('?action=undo_last',{method:'POST',body:'{}'}),t=d.undone||{},name=t.people&&t.people.name?t.people.name:'transaction';showToast('Undone: '+name+' · '+labelType(t.transaction_type));await load()}catch(e){showToast(e.message)}
+}
+async function archiveSettled(){
+  if(!confirm('Archive all currently settled people? Their history will remain available under Archived.'))return;
+  try{var d=await api('?action=archive_settled',{method:'POST',body:'{}'});showToast((d.count||0)+' settled '+((d.count||0)===1?'person':'people')+' archived.');await load()}catch(e){showToast(e.message)}
+}
+function cleanFileName(v){return String(v||'statement').replace(/[^a-zA-Z0-9 _-]/g,'').trim().replace(/\s+/g,'_').slice(0,60)||'statement'}
+async function shareExport(url,fileName,mime){
+  try{
+    var r=await fetch(url,{headers:{Authorization:'Bearer '+accessKey}});if(!r.ok){var e={};try{e=await r.json()}catch(x){}throw new Error(e.error||'Export failed')}
+    var blob=await r.blob(),file=new File([blob],fileName,{type:mime}),share={title:fileName,files:[file]},shared=false;
+    if(navigator.share&&(!navigator.canShare||navigator.canShare(share))){try{await navigator.share(share);shared=true}catch(e){if(e&&e.name==='AbortError')return}}
+    if(!shared){var href=URL.createObjectURL(blob),a=document.createElement('a');a.href=href;a.download=fileName;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(href)},3000);showToast(fileName+' downloaded.')}
+  }catch(e){showToast(e.message)}
+}
+async function exportStatement(format){
+  if(!selectedPerson)return;var nonClassic=Object.keys(selectedPerson.balances).some(function(c){return !['TTD','USD'].includes(c)});
+  var base=nonClassic?API:API_CLASSIC,url=base+'?action=export&person_id='+encodeURIComponent(selectedPerson.id)+'&format='+format,
+      ext=format==='pdf'?'pdf':'xlsx',mime=format==='pdf'?'application/pdf':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  await shareExport(url,'Money_Owed_'+cleanFileName(selectedPerson.name)+'.'+ext,mime)
+}
+async function exportAll(format){
+  var ext=format==='pdf'?'pdf':'xlsx',mime=format==='pdf'?'application/pdf':'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  await shareExport(API+'?action=export_all&format='+format,'Money_Owed_All_Balances.'+ext,mime)
+}
+function setCur(c){
+  currency=String(c||'TTD').toUpperCase();document.querySelectorAll('[data-cur]').forEach(function(b){b.classList.toggle('on',b.dataset.cur===currency)});
+  var sel=el('otherCurrency');if(sel&&![...document.querySelectorAll('[data-cur]')].some(function(b){return b.dataset.cur===currency})){sel.value=currency}else if(sel)sel.value=''
+}
+function setAction(a){
+  actionMode=a;document.querySelectorAll('[data-action]').forEach(function(b){b.classList.toggle('on',b.dataset.action===a)});
+  var opts=[];
+  if(a==='they_owe'){direction=1;opts=[['cash_loan','Loan'],['purchase_on_behalf','Purchases'],['adjustment','Adjustment'],['other','Other']]}
+  else if(a==='they_paid'){direction=-1;opts=[['they_paid_me','Repayment']]}
+  else if(a==='i_owe'){direction=-1;opts=[['borrowed_from_them','Loan'],['they_bought_for_me','Purchases'],['adjustment','Adjustment'],['other','Other']]}
+  else{direction=1;opts=[['paid_them','Repayment']]}
+  el('type').innerHTML=opts.map(function(o){return'<option value="'+o[0]+'">'+o[1]+'</option>'}).join('');
+  el('categoryField').style.display=opts.length>1?'block':'none'
+}
+function openSheet(){el('overlay').style.display='flex';el('date').value=today();if(!el('person').value)setAction('they_owe');setTimeout(function(){if(!el('person').value)el('person').focus()},100)}
+function closeSheet(){el('overlay').style.display='none'}
+function populateCurrencies(){
+  var common=['GYD','BBD','XCD','CAD','EUR','GBP','AUD','NZD','JPY','CNY','HKD','SGD','INR','AED','SAR','ZAR','MXN','BRL','CHF','JMD','BSD','BZD','DOP'];
+  el('otherCurrency').innerHTML='<option value="">Other…</option>'+common.map(function(c){return'<option value="'+c+'">'+currencyFlag(c)+' '+esc(currencyNames[c]||c)+'</option>'}).join('')+'<option value="CUSTOM">🌐 Custom currency…</option>'
+}
+
+el('unlockBtn').onclick=unlock;el('keyInput').onkeydown=function(e){if(e.key==='Enter')unlock()};
+el('refreshBtn').onclick=load;el('addBtn').onclick=function(){el('person').value='';openSheet()};el('cancelBtn').onclick=closeSheet;
+el('overlay').onclick=function(e){if(e.target===el('overlay'))closeSheet()};
+document.querySelectorAll('[data-action]').forEach(function(b){b.onclick=function(){setAction(b.dataset.action)}});
+document.querySelectorAll('[data-cur]').forEach(function(b){b.onclick=function(){setCur(b.dataset.cur)}});
+el('otherCurrency').onchange=function(){
+  if(this.value==='CUSTOM'){
+    var code=prompt('Enter the 3-letter currency code, for example GYD, GBP or EUR:','');
+    if(code&&/^[A-Za-z]{3}$/.test(code.trim()))setCur(code.trim().toUpperCase());
+    else{this.value='';if(code)showToast('Use a valid 3-letter currency code.')}
+  }else if(this.value)setCur(this.value)
+};
+el('form').onsubmit=async function(e){
+  e.preventDefault();var btn=el('saveBtn');btn.disabled=true;btn.textContent='Saving…';
+  try{
+    var d=await api('?action=transaction',{method:'POST',body:JSON.stringify({person_name:el('person').value,currency:currency,transaction_type:el('type').value,description:el('description').value,amount:Number(el('amount').value),direction:direction,transaction_date:el('date').value})});
+    closeSheet();el('form').reset();el('description').value='';setCur('TTD');setAction('they_owe');showToast('Saved.');await load()
+  }catch(err){showToast(err.message)}finally{btn.disabled=false;btn.textContent='Save transaction'}
+};
+el('search').oninput=function(){clearTimeout(searchTimer);searchTimer=setTimeout(doSearch,280)};
+el('clearBalanceFilter').onclick=function(){balanceFilter=null;el('search').value='';el('searchResults').style.display='none';render()};
+el('showArchivedBtn').onclick=function(){showArchived=!showArchived;balanceFilter=null;render()};
+el('undoBtn').onclick=undoLast;el('archiveSettledBtn').onclick=archiveSettled;
+el('exportAllPdf').onclick=function(){exportAll('pdf')};el('exportAllExcel').onclick=function(){exportAll('xlsx')};
+el('statementClose').onclick=closeStatement;el('statementOverlay').onclick=function(e){if(e.target===el('statementOverlay'))closeStatement()};
+el('exportPdf').onclick=function(){exportStatement('pdf')};el('exportExcel').onclick=function(){exportStatement('xlsx')};
+el('savePersonMeta').onclick=savePersonMeta;el('pinBtn').onclick=togglePin;el('archivePersonBtn').onclick=toggleArchive;
+document.querySelectorAll('[data-quick]').forEach(function(b){b.onclick=function(){quickAdd(b.dataset.quick)}});
+populateCurrencies();setCur('TTD');setAction('they_owe');
+if(accessKey){el('lock').style.display='none';api('?action=ping').then(load).catch(function(){localStorage.removeItem('moneyOwedAccessKey');accessKey='';el('lock').style.display='flex'})}
+else el('lock').style.display='flex';
+</script>
+</body>
+</html>
