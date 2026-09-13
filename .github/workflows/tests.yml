@@ -27,5 +27,6 @@ jobs:
         run: |
           node --check account-flow-core.js
           node --check ui-v20.js
+          node --check ui-v20-patch.js
           node --check receipt-app.js
           node --check receipt.js
